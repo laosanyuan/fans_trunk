@@ -1,0 +1,7 @@
+{
+    "bot_token": "",
+    "admin_user":"",
+    "proxy": "http://127.0.0.1:10809",
+    "wxpusher_token":"",
+    "wxpusher_uid":""
+}
