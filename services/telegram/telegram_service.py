@@ -1,5 +1,6 @@
 import asyncio
 
+
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, filters, ContextTypes, CallbackQueryHandler, ChatMemberHandler
 from telegram.constants import ChatMemberStatus
@@ -8,6 +9,7 @@ import inject
 
 from services.config_parser import ConfigParser
 from services.score_service import ScoreService
+from services.telegram.menu_strategy_manager import MenuStrategyManager, ButtonEnum
 from db.daos.user_dao import UserDao
 from db.daos.channel_dao import ChannelDao
 from db.daos.fleet_dao import FleetDao
@@ -18,8 +20,9 @@ class TelegramService:
     def __init__(self, config_parser: ConfigParser, score_service: ScoreService):
         self._score_service = score_service
         self._token = config_parser.get_bot_token()
-        self._application = ApplicationBuilder().token(self._token).build()
+        self._menu_strategy_manager = MenuStrategyManager()
 
+        self._application = ApplicationBuilder().token(self._token).build()
         self._application.add_handler(CallbackQueryHandler(self._button_callback))
         self._application.add_handler(CommandHandler('start', self._start_command))
         self._application.add_handler(CommandHandler('help', self._help_command))
@@ -36,25 +39,27 @@ class TelegramService:
         full_name = update.effective_user.full_name
         UserDao.add_user(uid=uid, user_name=user_name, full_name=full_name)
 
-        keyboard = [
-            [InlineKeyboardButton("🔥 添加机器人到频道", url=f'{self._application.bot.link}?startchannel&admin=post_messages+edit_messages+delete_messages+invite_users'),
-             InlineKeyboardButton("🫰 管理我的频道", callback_data="manage_channel")],
-            [InlineKeyboardButton("🚛 查看车队信息", callback_data="view_fleets")],
-            [InlineKeyboardButton("📜 查看运行规则", callback_data="view_rules")]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        self._application.bot
+        strategy = self._menu_strategy_manager.get_strategy(ButtonEnum.HOMEPAGE.value, self._application.bot)
+        message, reply_markup = strategy.get_message_and_buttons(uid)
 
-        await update.message.reply_text("请选择一个按钮：", reply_markup=reply_markup)
+        await update.message.reply_text(message, reply_markup=reply_markup)
 
     async def _help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass
 
     async def _button_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
-        await query.answer()  # 响应按钮点击
-        await query.edit_message_text(text=f"你点击了按钮 {query.data}")
+        callback_data = query.data
+        uid = query.from_user.id
+        strategy = self._menu_strategy_manager.get_strategy(callback_data, self._application.bot)
+        message, button = strategy.get_message_and_buttons(uid)
+
+        await query.answer()
+        await query.edit_message_text(text=message, reply_markup=button)
 
     async def _track_chat_member(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        # 处理添加移除机器人
         chat_member: ChatMemberUpdated = update.my_chat_member
         status = chat_member.new_chat_member.status
         uid = chat_member.from_user.id

@@ -10,7 +10,7 @@ from services.config_parser import ConfigParser
 from services.wxpusher_service import WxPusherService
 from services.scheduler_manager import SchedulerManager
 from services.fleet_manager import FleetManager
-from services.telegram_service import TelegramService
+from services.telegram.telegram_service import TelegramService
 from db.db_service import DbService
 from services.score_service import ScoreService
 

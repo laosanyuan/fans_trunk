@@ -2,6 +2,7 @@ from datetime import datetime
 
 from db.models.user import User
 from db.models.channel import Channel
+from models.channel_dto import ChannelDTO
 
 
 class UserDao:
@@ -23,3 +24,15 @@ class UserDao:
     def get_channels(uid: int) -> list[Channel]:
         result = User.get(User.id == uid).channels
         return result
+
+    @staticmethod
+    def get_user_fleets(uid: int) -> list[ChannelDTO]:
+        # 获取用户车队列表
+        result = User.get_or_none(User.id == uid).channels
+
+        list = []
+        if result != None:
+            for item in result:
+                list.append(ChannelDTO.from_model(item))
+
+        return list

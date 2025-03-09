@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from db.models.user import User
 from db.models.channel import Channel
 
 
