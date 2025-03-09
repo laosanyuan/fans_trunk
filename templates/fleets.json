@@ -1,32 +1,38 @@
 [
     {
-        "name":"【青铜】车队",
-        "min_score":0,
-        "max_score":20
+        "id": 1,
+        "name": "【青铜】车队",
+        "min_score": -100000,
+        "max_score": 20
     },
     {
-        "name":"【白银】车队",
-        "min_score":20,
-        "max_score":30
+        "id": 2,
+        "name": "【白银】车队",
+        "min_score": 20,
+        "max_score": 30
     },
     {
-        "name":"【黄金】车队",
-        "min_score":30,
-        "max_score":40
+        "id": 3,
+        "name": "【黄金】车队",
+        "min_score": 30,
+        "max_score": 40
     },
     {
-        "name":"【铂金】车队",
-        "min_score":40,
-        "max_score":60
+        "id": 4,
+        "name": "【铂金】车队",
+        "min_score": 40,
+        "max_score": 60
     },
     {
-        "name":"【星耀】车队",
-        "min_score":60,
-        "max_score":80
+        "id": 5,
+        "name": "【星耀】车队",
+        "min_score": 60,
+        "max_score": 80
     },
     {
-        "name":"【王者】车队",
-        "min_score":80,
-        "max_score":100
+        "id": 6,
+        "name": "【王者】车队",
+        "min_score": 80,
+        "max_score": 100000
     }
 ]

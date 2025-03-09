@@ -14,7 +14,7 @@ class Channel(Model):
     name = CharField(max_length=255)
     title = CharField(max_length=255)
     user = ForeignKeyField(User, backref='channels', on_delete='CASCADE')
-    fleed = ForeignKeyField(Fleet, backref='channels')
+    fleet = ForeignKeyField(Fleet, backref='channels')
     is_enable = BooleanField(default=False)
     is_access = BooleanField(default=False)
     score = IntegerField(default=0)

@@ -1,5 +1,3 @@
-import asyncio
-
 from pytz import timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -7,12 +5,14 @@ from apscheduler.triggers.cron import CronTrigger
 import inject
 
 from services.wxpusher_service import WxPusherService
+from services.fleet_manager import FleetManager
 
 
-class SchedulerService:
+class SchedulerManager:
     @inject.autoparams()
-    def __init__(self, wx_pusher: WxPusherService):
+    def __init__(self, wx_pusher: WxPusherService, fleet_service: FleetManager):
         self._wx_pusher = wx_pusher
+        self._fleet_service = fleet_service
 
         self._scheduler = AsyncIOScheduler()
 
@@ -47,7 +47,7 @@ class SchedulerService:
         pass
 
     def _update_score(self):
-        pass
+        self._fleet_service.update_fleets()
 
     def _check_channel_message(self):
         pass

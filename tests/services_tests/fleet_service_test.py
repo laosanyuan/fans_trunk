@@ -1,12 +1,12 @@
 import unittest
 
-from services.fleet_service import FleetService
+from services.fleet_manager import FleetManager
 
 
 class TestFleetService(unittest.TestCase):
     
     def test_get_fleets(self):
-        fleet_service = FleetService("configs/fleets.json")
+        fleet_service = FleetManager("configs/fleets.json")
 
         results = fleet_service.get_fleets()
 

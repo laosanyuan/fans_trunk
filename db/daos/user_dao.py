@@ -16,7 +16,7 @@ class UserDao:
     @staticmethod
     def ban_user(uid: int) -> None:
         User.update(is_banned=True)\
-            .where(id == uid)\
+            .where(User.id == uid)\
             .execute()
 
     @staticmethod
