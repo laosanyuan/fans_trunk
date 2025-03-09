@@ -1,3 +1,5 @@
+import asyncio
+
 from pytz import timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -29,13 +31,14 @@ class SchedulerService:
                                 IntervalTrigger(hours=1),
                                 max_instances=1)
 
-    def start(self):
+    async def start(self):
         """启动调度器"""
         self._scheduler.start()
 
     def stop(self):
         """停止调度器"""
-        self._scheduler.pause()
+        if self._scheduler.state == 1:
+            self._scheduler.pause()
 
     def _post_daily_report(self):
         pass

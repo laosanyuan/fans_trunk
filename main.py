@@ -2,6 +2,7 @@ import traceback
 import platform
 import os
 import sys
+import asyncio
 
 import inject
 
@@ -9,6 +10,8 @@ from services.config_parser import ConfigParser
 from services.wxpusher_service import WxPusherService
 from services.scheduler_service import SchedulerService
 from services.fleet_service import FleetService
+from services.telegram_service import TelegramService
+from db.db_service import DbService
 
 
 def global_exception_handler(exctype, value, tb):
@@ -23,8 +26,8 @@ def define_bindings(binder: inject.Binder):
     binder.bind(FleetService, FleetService('configs/fleets.json'))
     binder.bind_to_constructor(WxPusherService, WxPusherService)
     binder.bind_to_constructor(SchedulerService, SchedulerService)
-    # binder.bind(DbService, DbService("./configs/data.db"))
-    # binder.bind_to_constructor(TelegramService, TelegramService)
+    binder.bind_to_constructor(TelegramService, TelegramService)
+    binder.bind(DbService, DbService("./configs/data.db"))
 
 
 def main_method():
@@ -38,11 +41,17 @@ def main_method():
         os.environ["http_proxy"] = proxy
         os.environ["https_proxy"] = proxy
 
-    # 启动调度器
-    inject.instance(SchedulerService).start()
-
-    # # 初始化数据库
-    # inject.instance(DbService).init_db()
+    try:
+        inject.instance(DbService).init_db()
+        asyncio.run(inject.instance(SchedulerService).start())
+        asyncio.run(inject.instance(TelegramService).start())
+    except KeyboardInterrupt:
+        print("程序被手动终止")
+    except Exception as e:
+        print(f"发生异常: {e}")
+    finally:
+        inject.instance(DbService).close_db()
+        inject.instance(SchedulerService).stop()
 
 
 if __name__ == '__main__':
