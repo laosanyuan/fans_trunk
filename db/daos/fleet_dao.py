@@ -15,9 +15,14 @@ class FleetDao:
             Fleet.create(id=id, name=name, min_score=min_score, max_score=max_score)
 
     @staticmethod
-    def get_fleet(score: int) -> FleetDTO:
+    def get_fleet_by_score(score: int) -> FleetDTO:
         # 根据评分获取车队
         result = Fleet.get(score >= Fleet.min_score and score < Fleet.max_score)
+        return FleetDTO.from_model(result)
+
+    @staticmethod
+    def get_fleet_by_id(id: int) -> FleetDTO:
+        result = Fleet.get(Fleet.id == id)
         return FleetDTO.from_model(result)
 
     @staticmethod

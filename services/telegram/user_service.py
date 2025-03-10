@@ -1,4 +1,4 @@
-from telegram import Update, ChatMemberUpdated
+from telegram import Update, ChatMemberUpdated, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler, ChatMemberHandler, Application
 from telegram.constants import ChatMemberStatus
 import inject
@@ -12,8 +12,8 @@ from db.daos.fleet_dao import FleetDao
 
 class UserService:
     def __init__(self, application: Application):
-        self._menu_strategy_manager = MenuStrategyManager()
         self._application = application
+        self._menu_strategy_manager = MenuStrategyManager(self._application.bot)
         self._score_service = inject.instance(ScoreService)
 
         self._application.add_handler(CallbackQueryHandler(self._button_callback))
@@ -28,8 +28,7 @@ class UserService:
         UserDao.add_user(uid=uid, user_name=user_name, full_name=full_name)
 
         self._application.bot
-        strategy = self._menu_strategy_manager.get_strategy(ButtonEnum.HOMEPAGE.value, self._application.bot)
-        message, reply_markup = strategy.get_message_and_buttons(uid)
+        message, reply_markup = self._menu_strategy_manager.get_message_and_buttons(ButtonEnum.HOMEPAGE.value, uid)
 
         await update.message.reply_text(message, reply_markup=reply_markup)
 
@@ -40,11 +39,12 @@ class UserService:
         query = update.callback_query
         callback_data = query.data
         uid = query.from_user.id
-        strategy = self._menu_strategy_manager.get_strategy(callback_data, self._application.bot)
-        message, button = strategy.get_message_and_buttons(uid)
+        result = self._menu_strategy_manager.get_message_and_buttons(callback_data, uid)
 
-        await query.answer()
-        await query.edit_message_text(text=message, reply_markup=button)
+        if isinstance(result, str):
+            await query.answer(text=result, cache_time=3)
+        elif isinstance(result, tuple):
+            await query.edit_message_text(text=result[0], reply_markup=result[1])
 
     async def _track_chat_member(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 处理添加移除机器人
@@ -60,7 +60,7 @@ class UserService:
             # 暂未实现获取浏览量
             view_count = 0.05*fans_count
             score = self._score_service.get_score(fans_count, view_count)
-            fleet = FleetDao.get_fleet(score)
+            fleet = FleetDao.get_fleet_by_score(score)
             ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id)
 
             message = f'''恭喜您，添加频道成功！

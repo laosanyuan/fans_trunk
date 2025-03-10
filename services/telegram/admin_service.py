@@ -5,5 +5,5 @@ from services.telegram.menu_strategies.menu_strategy_manager import MenuStrategy
 
 class AdminService:
     def __init__(self, application: Application):
-        self._menu_strategy_manager = MenuStrategyManager()
         self._application = application
+        self._menu_strategy_manager = MenuStrategyManager(self._application.bot)

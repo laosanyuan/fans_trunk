@@ -26,8 +26,8 @@ class UserDao:
         return result
 
     @staticmethod
-    def get_user_fleets(uid: int) -> list[ChannelDTO]:
-        # 获取用户车队列表
+    def get_user_channels(uid: int) -> list[ChannelDTO]:
+        # 获取用户频道列表
         result = User.get_or_none(User.id == uid).channels
 
         list = []
