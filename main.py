@@ -10,7 +10,7 @@ from services.config_parser import ConfigParser
 from services.wxpusher_service import WxPusherService
 from services.scheduler_manager import SchedulerManager
 from services.fleet_manager import FleetManager
-from services.telegram.telegram_service import TelegramService
+from services.telegram.bot_manager import BotManager
 from db.db_service import DbService
 from services.score_service import ScoreService
 
@@ -26,7 +26,7 @@ def define_bindings(binder: inject.Binder):
     binder.bind(ConfigParser, ConfigParser('configs/settings.json'))
     binder.bind_to_constructor(ScoreService, ScoreService)
     binder.bind_to_constructor(WxPusherService, WxPusherService)
-    binder.bind_to_constructor(TelegramService, TelegramService)
+    binder.bind_to_constructor(BotManager, BotManager)
     binder.bind(DbService, DbService("./configs/data.db"))
     binder.bind(FleetManager, FleetManager('configs/fleets.json'))
     binder.bind_to_constructor(SchedulerManager, SchedulerManager)
@@ -47,7 +47,7 @@ def main_method():
         inject.instance(DbService).init_db()
         inject.instance(FleetManager).init()
         asyncio.run(inject.instance(SchedulerManager).start())
-        asyncio.run(inject.instance(TelegramService).start())
+        asyncio.run(inject.instance(BotManager).run())
     except KeyboardInterrupt:
         print("程序被手动终止")
     except Exception as e:

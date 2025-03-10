@@ -1,37 +1,25 @@
-import asyncio
-
-
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
-from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, filters, ContextTypes, CallbackQueryHandler, ChatMemberHandler
+from telegram import Update, ChatMemberUpdated
+from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler, ChatMemberHandler, Application
 from telegram.constants import ChatMemberStatus
 import inject
 
-
-from services.config_parser import ConfigParser
+from services.telegram.menu_strategies.menu_strategy_manager import MenuStrategyManager, ButtonEnum
 from services.score_service import ScoreService
-from services.telegram.menu_strategy_manager import MenuStrategyManager, ButtonEnum
 from db.daos.user_dao import UserDao
 from db.daos.channel_dao import ChannelDao
 from db.daos.fleet_dao import FleetDao
 
 
-class TelegramService:
-    @inject.autoparams()
-    def __init__(self, config_parser: ConfigParser, score_service: ScoreService):
-        self._score_service = score_service
-        self._token = config_parser.get_bot_token()
+class UserService:
+    def __init__(self, application: Application):
         self._menu_strategy_manager = MenuStrategyManager()
+        self._application = application
+        self._score_service = inject.instance(ScoreService)
 
-        self._application = ApplicationBuilder().token(self._token).build()
         self._application.add_handler(CallbackQueryHandler(self._button_callback))
         self._application.add_handler(CommandHandler('start', self._start_command))
         self._application.add_handler(CommandHandler('help', self._help_command))
         self._application.add_handler(ChatMemberHandler(self._track_chat_member, ChatMemberHandler.ANY_CHAT_MEMBER))
-
-    def start(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        self._application.run_polling(close_loop=False)
 
     async def _start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = update.effective_user.id
