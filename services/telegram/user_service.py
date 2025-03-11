@@ -28,7 +28,7 @@ class UserService:
         UserDao.add_user(uid=uid, user_name=user_name, full_name=full_name)
 
         self._application.bot
-        message, reply_markup = self._menu_strategy_manager.get_message_and_buttons(ButtonEnum.HOMEPAGE.value, uid)
+        message, reply_markup = await self._menu_strategy_manager.get_message_and_buttons(ButtonEnum.HOMEPAGE.value, uid)
 
         await update.message.reply_text(message, reply_markup=reply_markup)
 
@@ -39,7 +39,7 @@ class UserService:
         query = update.callback_query
         callback_data = query.data
         uid = query.from_user.id
-        result = self._menu_strategy_manager.get_message_and_buttons(callback_data, uid)
+        result = await self._menu_strategy_manager.get_message_and_buttons(callback_data, uid)
 
         if isinstance(result, str):
             await query.answer(text=result, cache_time=3)
@@ -76,8 +76,11 @@ class UserService:
                 text=message
             )
         elif status == ChatMemberStatus.LEFT or status == ChatMemberStatus.BANNED or ChatMemberStatus.RESTRICTED:
-            ChannelDao.remove_channel(channel_id)
+            if not ChannelDao.is_exists(channel_id):
+                # 频道数据不存在可能为主动删除
+                return
 
+            ChannelDao.remove_channel(channel_id)
             message = f'您的频道【{channel_title}】已失去权限。如为误操作，请移除机器人后重新添加！'
             await context.bot.send_message(
                 chat_id=uid,

@@ -15,9 +15,9 @@ class BotManager:
 
         self._application = ApplicationBuilder().token(self._token).build()
 
-        self._user_service = UserService(self._application)
-        self._admin_service = AdminService(self._application)
-        self._chat_service = ChatService(self._application)
+        self.user_service = UserService(self._application)
+        self.admin_service = AdminService(self._application)
+        self.chat_service = ChatService(self._application)
 
 
     def run(self):

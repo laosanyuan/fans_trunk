@@ -12,5 +12,9 @@ class ChannelDao:
             Channel.create(id=channel_id, name=name, title=title, user_id=uid, fleet_id=fleet_id, add_time=datetime.now())
 
     @staticmethod
+    def is_exists(channel_id) -> bool:
+        return Channel.select().where(Channel.id == channel_id).exists()
+
+    @staticmethod
     def remove_channel(channel_id: int):
-        Channel.delete().where(id == channel_id).execute()
+        Channel.delete().where(Channel.id == channel_id).execute()

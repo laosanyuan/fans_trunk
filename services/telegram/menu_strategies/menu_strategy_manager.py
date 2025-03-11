@@ -13,27 +13,37 @@ class MenuStrategyManager:
         self._strategies = dict()
         self._bot = bot
 
-    def get_message_and_buttons(self, target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup],str]:
-        result = self._strategies.get(target)
+    async def get_message_and_buttons(self, target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup], str]:
+        result = self._update_strategies(target)
         if result == None:
-            if target == ButtonEnum.HOMEPAGE.value:
-                result = HomepageStrategy(target, self._bot)
-            elif target == ButtonEnum.MANAGE_CHANNEL.value:
-                result = ManageChannelStrategy(target)
-
-            if result != None:
-                self._strategies[target] = result
-
-        if result == None:
-            return self._handle_sub_operation(target, uid)
+            return await self._handle_sub_operation(target, uid)
         else:
-            return result.get_message_and_buttons(uid)
+            return await result.get_message_and_buttons(uid)
 
-    def _handle_sub_operation(self, target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup],str]:
+    async def _handle_sub_operation(self, target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup], str]:
         # 处理子菜单操作
         strs = target.split('#')
         if strs == None or len(strs) < 2:
             return
 
-        strategy = self._strategies[strs[0]]
-        return strategy.handle_operation(strs[1], uid)
+        strategy = self._update_strategies(strs[0])
+
+        if strategy == None:
+            return '未知操作，请重试！'
+        else:
+            return await strategy.handle_operation(strs[1], uid)
+
+    def _update_strategies(self, target):
+        result = self._strategies.get(target)
+        if result == None:
+            if target == ButtonEnum.HOMEPAGE.value:
+                result = HomepageStrategy(target, self._bot)
+            elif target == ButtonEnum.MANAGE_CHANNEL.value:
+                result = ManageChannelStrategy(target, self._bot)
+
+            if result != None:
+                self._strategies[target] = result
+            else:
+                return None
+
+        return self._strategies[target]

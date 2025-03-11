@@ -18,9 +18,9 @@ class BaseButtonStrategy(ABC):
         self.tag = tag
 
     @abstractmethod
-    def get_message_and_buttons(self, uid: int) -> Union[tuple[str, InlineKeyboardMarkup],str]:
+    async def get_message_and_buttons(self, uid: int) -> Union[tuple[str, InlineKeyboardMarkup],str]:
         pass
 
     @abstractmethod
-    def handle_operation(self, sub_target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup],str]:
+    async def handle_operation(self, sub_target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup],str]:
         pass
