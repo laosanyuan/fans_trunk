@@ -56,20 +56,33 @@ class UserService:
         channel_title = chat_member.chat.title
 
         if status == ChatMemberStatus.ADMINISTRATOR:
-            fans_count = await self._application.bot.get_chat_member_count(channel_id)
-            # 暂未实现获取浏览量
-            view_count = 0.05*fans_count
-            score = self._score_service.get_score(fans_count, view_count)
-            fleet = FleetDao.get_fleet_by_score(score)
-            ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id)
+            message = ''
+            has_permission = await self._check_permissions(channel_id)
+            if ChannelDao.is_exists(channel_id):
+                ChannelDao.update_permission(channel_id, has_permission)
+                if has_permission:
+                    message = f'✅ 频道【{channel_title}】机器人权限发生变更，当前权限有效，频道发车中！'
+                else:
+                    message = f'🚫 频道【{channel_title}】机器人权限发生变更，机器人时失去频道发车权限，请重新赋予正确权限后恢复发车！'
+            else:
+                fans_count = await self._application.bot.get_chat_member_count(channel_id)
+                # 暂未实现获取浏览量
+                view_count = 0.05*fans_count
+                score = self._score_service.get_score(fans_count, view_count)
+                fleet = FleetDao.get_fleet_by_score(score)
 
-            message = f'''恭喜您，添加频道成功！
+                ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id, has_permission)
+
+                if has_permission:
+                    message = f'''🎉 恭喜您，添加频道成功！
 
 系统根据您的频道数据智能评级，【{channel_title}】当前的得分为【{score}】，分配于{fleet.name}！
 
 注意，当前的评分和分配车队都是基于此频道目前的数据计算得出，随着数据的变化，评分和分配车队随时也会随时发生变化。
 
 ✈ 马上发车！'''
+                else:
+                    message = f'🚫 频道【{channel_title}】添加成功，但当前缺少运行权限无法运行，请赋予必要权限或删除后重新添加。\n\n机器人需要获得必要操作权限，然后才能发车！'
 
             await context.bot.send_message(
                 chat_id=uid,
@@ -86,3 +99,23 @@ class UserService:
                 chat_id=uid,
                 text=message
             )
+
+    async def _check_permissions(self, channel_id: int) -> bool:
+        """检查机器人所在频道权限
+        """
+        chat_member = await self._application.bot.get_chat_member(chat_id=channel_id, user_id=self._application.bot.id)
+        if chat_member.status == ChatMemberStatus.ADMINISTRATOR:
+            if not chat_member.can_manage_chat:
+                return False
+            elif not chat_member.can_post_messages:
+                return False
+            elif not chat_member.can_edit_messages:
+                return False
+            elif not chat_member.can_delete_messages:
+                return False
+            elif not chat_member.can_invite_users:
+                return False
+        else:
+            return False
+
+        return True
