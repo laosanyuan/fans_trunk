@@ -21,6 +21,9 @@ class UserService:
         self._application.add_handler(CommandHandler('help', self._help_command))
         self._application.add_handler(ChatMemberHandler(self._track_chat_member, ChatMemberHandler.ANY_CHAT_MEMBER))
 
+    async def update_all_user_data(self):
+        pass
+
     async def _start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = update.effective_user.id
         user_name = update.effective_user.username

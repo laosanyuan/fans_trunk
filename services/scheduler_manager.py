@@ -6,29 +6,28 @@ import inject
 
 from services.wxpusher_service import WxPusherService
 from services.fleet_manager import FleetManager
+from services.telegram.bot_manager import BotManager
 
 
 class SchedulerManager:
     @inject.autoparams()
-    def __init__(self, wx_pusher: WxPusherService, fleet_service: FleetManager):
+    def __init__(self, wx_pusher: WxPusherService, fleet_manager: FleetManager, bot_manager:BotManager):
         self._wx_pusher = wx_pusher
-        self._fleet_service = fleet_service
+        self._fleet_manager = fleet_manager
+        self._bot_manager = bot_manager
 
         self._scheduler = AsyncIOScheduler()
 
         # 日报
         self._scheduler.add_job(self._post_daily_report,
                                 CronTrigger(hour=22, timezone=timezone("Asia/Shanghai")))
-        # 每日数据更新
-        self._scheduler.add_job(self._update_daily_data,
-                                CronTrigger(hour=2, timezone=timezone("Asia/Shanghai")))
         # 评级更新
         self._scheduler.add_job(self._update_score,
-                                IntervalTrigger(hours=1),
+                                IntervalTrigger(hours=4),
                                 max_instances=1)
         # 检查频道消息
         self._scheduler.add_job(self._check_channel_message,
-                                IntervalTrigger(hours=1),
+                                IntervalTrigger(minutes=5),
                                 max_instances=1)
 
     async def start(self):
@@ -43,11 +42,9 @@ class SchedulerManager:
     def _post_daily_report(self):
         pass
 
-    def _update_daily_data(self):
-        pass
+    async def _update_score(self):
+        await self._bot_manager.user_service.update_all_user_data()
+        await self._fleet_manager.update_fleets_data()
 
-    def _update_score(self):
-        self._fleet_service.update_fleets()
-
-    def _check_channel_message(self):
-        pass
+    async def _check_channel_message(self):
+        await self._bot_manager.chat_service.check_chat();
