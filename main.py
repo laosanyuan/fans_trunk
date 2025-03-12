@@ -32,11 +32,9 @@ def define_bindings(binder: inject.Binder):
     binder.bind_to_constructor(SchedulerManager, SchedulerManager)
 
 
-def main_method():
-    # 启动时执行
+async def main():
     inject.configure(define_bindings)
 
-    # 设置代理
     if platform.system() == 'Windows':
         # 处于开发环境
         proxy = inject.instance(ConfigParser).get_proxy()
@@ -46,8 +44,16 @@ def main_method():
     try:
         inject.instance(DbService).init_db()
         inject.instance(FleetManager).init()
-        asyncio.run(inject.instance(SchedulerManager).start())
-        asyncio.run(inject.instance(BotManager).run())
+
+        scheduler_manager = inject.instance(SchedulerManager)
+        bot_manager = inject.instance(BotManager)
+
+        scheduler_manager.start()
+        await bot_manager.run()
+
+        while True:
+            await asyncio.sleep(1)
+
     except KeyboardInterrupt:
         print("程序被手动终止")
     except Exception as e:
@@ -56,7 +62,6 @@ def main_method():
         inject.instance(DbService).close_db()
         inject.instance(SchedulerManager).stop()
 
-
 if __name__ == '__main__':
     sys.excepthook = global_exception_handler
-    main_method()
+    asyncio.run(main())

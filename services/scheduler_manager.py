@@ -27,16 +27,16 @@ class SchedulerManager:
                                 max_instances=1)
         # 检查频道消息
         self._scheduler.add_job(self._check_channel_message,
-                                IntervalTrigger(minutes=5),
+                                IntervalTrigger(seconds=1),
                                 max_instances=1)
 
-    async def start(self):
+    def start(self):
         """启动调度器"""
         self._scheduler.start()
 
     def stop(self):
         """停止调度器"""
-        if self._scheduler.state == 1:
+        if self._scheduler.running:
             self._scheduler.pause()
 
     def _post_daily_report(self):
@@ -47,4 +47,5 @@ class SchedulerManager:
         await self._fleet_manager.update_fleets_data()
 
     async def _check_channel_message(self):
+        print('test')
         await self._bot_manager.chat_service.check_chat();

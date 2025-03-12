@@ -26,11 +26,9 @@ class ChannelDao:
 
     @staticmethod
     def get_all_validate_channels() -> list[ChannelDTO]:
-        tmps = Channel.get(Channel.is_access and not Channel.is_banned and Channel.is_enable)
+        tmps = Channel.select().where(Channel.is_access == True and Channel.is_banned == False and Channel.is_enable == True)
         results = []
         for item in tmps:
             results.append(ChannelDTO.from_model(item))
 
         return results
-
-
