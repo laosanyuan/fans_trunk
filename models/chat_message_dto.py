@@ -12,7 +12,7 @@ class ChatMessageDTO:
     @classmethod
     def from_model(cls, message_model: ChatMessage):
         return cls(
-            id=message_model.chat_id,
+            id=message_model.message_id,
             channel_id=message_model.channel_id,
             push_time=message_model.push_time
         )

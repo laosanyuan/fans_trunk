@@ -1,4 +1,4 @@
-from peewee import CharField, Model,  DateTimeField, ForeignKeyField,AutoField
+from peewee import Model,  DateTimeField, ForeignKeyField, AutoField, IntegerField
 
 from db.models.channel import Channel
 
@@ -10,7 +10,7 @@ class ChatMessage(Model):
         Model (_type_): _description_
     """
     id = AutoField(primary_key=True)
-    chat_id = CharField(max_length=255)
+    message_id = IntegerField()
     channel = ForeignKeyField(Channel, backref='messages', on_delete='CASCADE')
     push_time = DateTimeField()
 
