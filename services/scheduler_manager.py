@@ -43,6 +43,8 @@ class SchedulerManager:
         pass
 
     async def _update_score(self):
+        """更新频道数据
+        """
         await self._bot_manager.user_service.update_all_user_data()
         await self._fleet_manager.update_fleets_data()
 

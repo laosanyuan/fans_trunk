@@ -20,6 +20,7 @@ class Channel(Model):
     score = IntegerField(default=0)
     add_time = DateTimeField()
     is_banned = BooleanField(default=False)
+    member_count = IntegerField(default=0)
 
     class Meta:
         database = None

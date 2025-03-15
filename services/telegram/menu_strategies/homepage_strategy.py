@@ -19,7 +19,7 @@ class HomepageStrategy(BaseButtonStrategy):
         ]
         markup = InlineKeyboardMarkup(keyboard)
 
-        message = f'欢迎使用【{self._bot.name}】！'
+        message = f'欢迎使用【{self._bot.first_name}】！'
 
         return message, markup
 

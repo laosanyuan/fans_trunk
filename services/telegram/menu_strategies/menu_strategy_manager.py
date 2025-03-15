@@ -6,6 +6,7 @@ from telegram import InlineKeyboardMarkup
 from services.telegram.menu_strategies.base_strategy import ButtonEnum
 from services.telegram.menu_strategies.manage_channel_strategy import ManageChannelStrategy
 from services.telegram.menu_strategies.homepage_strategy import HomepageStrategy
+from services.telegram.menu_strategies.fleet_strategy import FleetStrategy
 
 
 class MenuStrategyManager:
@@ -40,6 +41,8 @@ class MenuStrategyManager:
                 result = HomepageStrategy(target, self._bot)
             elif target == ButtonEnum.MANAGE_CHANNEL.value:
                 result = ManageChannelStrategy(target, self._bot)
+            elif target == ButtonEnum.VIEW_FLEETS.value:
+                result = FleetStrategy(target, self._bot)
 
             if result != None:
                 self._strategies[target] = result

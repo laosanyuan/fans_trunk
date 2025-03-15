@@ -1,6 +1,8 @@
+import asyncio
+
 from telegram import Update, ChatMemberUpdated
 from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler, ChatMemberHandler, Application
-from telegram.constants import ChatMemberStatus
+from telegram.constants import ChatMemberStatus, ParseMode
 import inject
 
 from services.telegram.menu_strategies.menu_strategy_manager import MenuStrategyManager, ButtonEnum
@@ -22,7 +24,14 @@ class UserService:
         self._application.add_handler(ChatMemberHandler(self._track_chat_member, ChatMemberHandler.ANY_CHAT_MEMBER))
 
     async def update_all_user_data(self):
-        pass
+        channels = ChannelDao.get_all_validate_channels()
+        for channel in channels:
+            member_count = await self._application.bot.get_chat_member_count(channel.id)
+            view_count = 0.05*member_count
+            score = self._score_service.get_score(member_count, view_count)
+            fleet = FleetDao.get_fleet_by_score(score)
+            ChannelDao.update_member_count(member_count, fleet.id)
+            await asyncio.sleep(1)
 
     async def _start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = update.effective_user.id
@@ -46,7 +55,10 @@ class UserService:
         if isinstance(result, str):
             await query.answer(text=result, cache_time=3)
         elif isinstance(result, tuple):
-            await query.edit_message_text(text=result[0], reply_markup=result[1])
+            await query.edit_message_text(
+                text=result[0],
+                reply_markup=result[1],
+                parse_mode=ParseMode.HTML)
 
     async def _track_chat_member(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 处理添加移除机器人
@@ -67,28 +79,30 @@ class UserService:
                 else:
                     message = f'🚫 频道【{channel_title}】机器人权限发生变更，机器人时失去频道发车权限，请重新赋予正确权限后恢复发车！'
             else:
-                fans_count = await self._application.bot.get_chat_member_count(channel_id)
+                member_count = await self._application.bot.get_chat_member_count(channel_id)
                 # 暂未实现获取浏览量
-                view_count = 0.05*fans_count
-                score = self._score_service.get_score(fans_count, view_count)
+                view_count = 0.05*member_count
+                score = self._score_service.get_score(member_count, view_count)
                 fleet = FleetDao.get_fleet_by_score(score)
 
-                ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id, has_permission)
+                ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id, has_permission, member_count)
+                FleetDao.update_fleets_data()
 
                 if has_permission:
                     message = f'''🎉 恭喜您，添加频道成功！
 
-系统根据您的频道数据智能评级，【{channel_title}】当前的得分为【{score}】，分配于{fleet.name}！
+系统根据您的频道数据智能评级，【<b>{channel_title}</b>】当前的得分为<b>{score}</b>，分配于<b>{fleet.name}</b>，本车队包含频道数量：<b>{fleet.channel_count}</b>，合计覆盖成员数量：<b>{fleet.member_count}</b>！
 
 注意，当前的评分和分配车队都是基于此频道目前的数据计算得出，随着数据的变化，评分和分配车队随时也会随时发生变化。
 
-✈ 马上发车！'''
+✈ 祝大哥发财，马上发车！'''
                 else:
                     message = f'🚫 频道【{channel_title}】添加成功，但当前缺少运行权限无法运行，请赋予必要权限或删除后重新添加。\n\n机器人需要获得必要操作权限，然后才能发车！'
 
             await context.bot.send_message(
                 chat_id=uid,
-                text=message
+                text=message,
+                parse_mode=ParseMode.HTML
             )
         elif status == ChatMemberStatus.LEFT or status == ChatMemberStatus.BANNED or ChatMemberStatus.RESTRICTED:
             if not ChannelDao.is_exists(channel_id):

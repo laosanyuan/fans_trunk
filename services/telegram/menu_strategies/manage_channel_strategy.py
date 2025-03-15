@@ -57,9 +57,9 @@ class ManageChannelStrategy(BaseButtonStrategy):
             strs = sub_target.split('%')
             if strs[0] == 'running':
                 fleet = FleetDao.get_fleet_by_id(int(strs[1]))
-                return f'当前频道整运行于{fleet.name}，本车队覆盖频道数：{fleet.all_channel_count}，曝光覆盖总成员数约为：{fleet.all_fans_count}'
+                return f'当前频道整运行于{fleet.name}，本车队覆盖频道数：{fleet.channel_count}，曝光覆盖总成员数约为：{fleet.member_count}'
             elif strs[0] == 'delete_channel':
                 channel_id = int(strs[1])
                 ChannelDao.remove_channel(channel_id)
                 await self._bot.leave_chat(channel_id)
-                return self.get_message_and_buttons(uid, '频道删除成功，以下是更新后的频道列表（如果频道数据存在错误，可删除后重新添加）：')
+                return await self.get_message_and_buttons(uid, '频道删除成功，以下是更新后的频道列表（如果频道数据存在错误，可删除后重新添加）：')

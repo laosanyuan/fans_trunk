@@ -21,11 +21,6 @@ class UserDao:
             .execute()
 
     @staticmethod
-    def get_channels(uid: int) -> list[Channel]:
-        result = User.get(User.id == uid).channels
-        return result
-
-    @staticmethod
     def get_user_channels(uid: int) -> list[ChannelDTO]:
         # 获取用户频道列表
         result = User.get_or_none(User.id == uid).channels

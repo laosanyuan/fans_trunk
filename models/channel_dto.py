@@ -16,6 +16,7 @@ class ChannelDTO:
         score: int,
         add_time: datetime,
         is_banned: bool,
+        member_count: int
     ):
         self.id = id
         self.name = name
@@ -27,6 +28,7 @@ class ChannelDTO:
         self.score = score
         self.add_time = add_time
         self.is_banned = is_banned
+        self.member_count = member_count
 
     @classmethod
     def from_model(cls, channel_model: Channel):
@@ -44,4 +46,5 @@ class ChannelDTO:
             score=channel_model.score,
             add_time=channel_model.add_time,
             is_banned=channel_model.is_banned,
+            member_count=channel_model.member_count
         )

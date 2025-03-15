@@ -26,8 +26,27 @@ class FleetDao:
         return FleetDTO.from_model(result)
 
     @staticmethod
+    def get_all_fleets() -> list[FleetDTO]:
+        """获取所有车队信息"""
+        return [FleetDTO.from_model(fleet) for fleet in Fleet.select()]
+
+    @staticmethod
     def update_status(id: int, fans_count: int, channel_count: int) -> None:
         # 更新车队覆盖数据
         Fleet.update(all_fans_count=fans_count, all_channel_count=channel_count)\
             .where(Fleet.id == id)\
             .execute()
+
+    @staticmethod
+    def update_fleets_data() -> None:
+        """更新频道实时数据
+        """
+        fleets = Fleet.select()
+        for fleet in fleets:
+            channel_count = len(fleet.channels)
+            member_count = 0
+            for tmp_channel in fleet.channels:
+                member_count += tmp_channel.member_count
+            Fleet.update(member_count=member_count, channel_count=channel_count)\
+                .where(Fleet.id == fleet.id)\
+                .execute()

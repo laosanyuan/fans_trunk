@@ -11,8 +11,8 @@ class Fleet(Model):
     name = CharField(max_length=255)
     min_score = IntegerField(default=0)
     max_score = IntegerField(default=100)
-    all_fans_count = IntegerField(default=0)
-    all_channel_count = IntegerField(default=0)
+    member_count = IntegerField(default=0)
+    channel_count = IntegerField(default=0)
 
     class Meta:
         database = None
