@@ -7,13 +7,14 @@ import asyncio
 import inject
 import nest_asyncio
 
+from db.db_service import DbService
 from services.config_parser import ConfigParser
 from services.wxpusher_service import WxPusherService
 from services.scheduler_manager import SchedulerManager
 from services.fleet_manager import FleetManager
 from services.telegram.bot_manager import BotManager
-from db.db_service import DbService
 from services.score_service import ScoreService
+from services.ad_service import AdService
 
 
 def global_exception_handler(exctype, value, tb):
@@ -31,6 +32,7 @@ def define_bindings(binder: inject.Binder):
     binder.bind(DbService, DbService("./configs/data.db"))
     binder.bind(FleetManager, FleetManager('configs/fleets.json'))
     binder.bind_to_constructor(SchedulerManager, SchedulerManager)
+    binder.bind(AdService, AdService('./configs/ad_settings.json'))
 
 
 async def main():

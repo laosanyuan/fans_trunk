@@ -3,10 +3,12 @@ from datetime import datetime, timedelta
 from telegram.ext import MessageHandler, Application
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext.filters import TEXT, COMMAND
+import inject
 
 from db.daos.channel_dao import ChannelDao
 from db.daos.chat_dao import ChatDao
 from models.chat_message_dto import ChatMessageDTO
+from services.ad_service import AdService, AdConfig
 
 
 class ChatService:
@@ -42,8 +44,21 @@ class ChatService:
             print('删除消息失败')
 
     async def _publish_message(self, channel_id: int) -> None:
-        message = self._generate_message(channel_id)
-        markup = InlineKeyboardMarkup([[InlineKeyboardButton('🎁 加入互推 🎁', self._application.bot.link)]])
+        ad_service = inject.instance(AdService)
+        # 文案部分
+        fleet_name = f'\n<b>{self._application.bot.first_name}</b> - 精彩推送'
+        head_ad = self._get_ad_message(ad_service.head_ads)
+        tail_ad = self._get_ad_message(ad_service.tail_ads)
+        body = self._generate_message(channel_id)
+        message = f'{fleet_name}\n{head_ad}\n{body}\n{tail_ad}'
+
+        # 按钮部分
+        button_list = []
+        for ad in ad_service.button_ads:
+            button_list.append([InlineKeyboardButton(ad.text, ad.link)])
+        button_list.append([InlineKeyboardButton('🎁 加入互推 🎁', self._application.bot.link)])
+        markup = InlineKeyboardMarkup(button_list)
+
         result = await self._application.bot.send_message(
             chat_id=channel_id,
             text=message,
@@ -59,10 +74,16 @@ class ChatService:
 
     def _generate_message(self, channel_id) -> str:
         results = ChannelDao.get_message_channels(channel_id)
-
-        message = f'\n<b>{self._application.bot.first_name}</b>\n\n'
+        message = ''
         for index, channel in enumerate(results):
             tmp = f'{index+1}. <b><a href="https://t.me/{channel.name}">{channel.title}</a></b>\n'
+            message += tmp
+        return message
+
+    def _get_ad_message(self, ads: list[AdConfig]) -> None:
+        message = ''
+        for ad in ads:
+            tmp = f'<b>AD: <a href="{ad.link}">{ad.text}</a></b>\n'
             message += tmp
         return message
 
