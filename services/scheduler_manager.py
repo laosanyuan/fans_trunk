@@ -11,7 +11,7 @@ from services.telegram.bot_manager import BotManager
 
 class SchedulerManager:
     @inject.autoparams()
-    def __init__(self, wx_pusher: WxPusherService, fleet_manager: FleetManager, bot_manager:BotManager):
+    def __init__(self, wx_pusher: WxPusherService, fleet_manager: FleetManager, bot_manager: BotManager):
         self._wx_pusher = wx_pusher
         self._fleet_manager = fleet_manager
         self._bot_manager = bot_manager
@@ -27,7 +27,7 @@ class SchedulerManager:
                                 max_instances=1)
         # 检查频道消息
         self._scheduler.add_job(self._check_channel_message,
-                                IntervalTrigger(seconds=10),
+                                IntervalTrigger(minutes=3),
                                 max_instances=1)
 
     def start(self):
@@ -47,5 +47,5 @@ class SchedulerManager:
         await self._fleet_manager.update_fleets_data()
 
     async def _check_channel_message(self):
-        print('test')
-        await self._bot_manager.chat_service.check_chat();
+        # 检查更新频道消息
+        await self._bot_manager.chat_service.check_chat()

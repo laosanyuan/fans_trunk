@@ -5,6 +5,7 @@ import sys
 import asyncio
 
 import inject
+import nest_asyncio
 
 from services.config_parser import ConfigParser
 from services.wxpusher_service import WxPusherService
@@ -63,5 +64,6 @@ async def main():
         inject.instance(SchedulerManager).stop()
 
 if __name__ == '__main__':
+    nest_asyncio.apply()
     sys.excepthook = global_exception_handler
     asyncio.run(main())

@@ -1,4 +1,4 @@
-from telegram import Update, ChatMemberUpdated, InlineKeyboardMarkup
+from telegram import Update, ChatMemberUpdated
 from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler, ChatMemberHandler, Application
 from telegram.constants import ChatMemberStatus
 import inject
@@ -30,7 +30,6 @@ class UserService:
         full_name = update.effective_user.full_name
         UserDao.add_user(uid=uid, user_name=user_name, full_name=full_name)
 
-        self._application.bot
         message, reply_markup = await self._menu_strategy_manager.get_message_and_buttons(ButtonEnum.HOMEPAGE.value, uid)
 
         await update.message.reply_text(message, reply_markup=reply_markup)

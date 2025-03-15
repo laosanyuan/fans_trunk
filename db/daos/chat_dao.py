@@ -16,15 +16,20 @@ class ChatDao:
         return ChatMessageDTO.from_model(result)
 
     @staticmethod
-    def update_message(channel_id: int, meessage_id: int) -> None:
+    def update_publish_message(channel_id: int, message_id: int) -> None:
+        """更新发布消息
+        """
         if ChatDao.is_exists(channel_id):
-            ChatMessage.update(meessage_id=meessage_id, push_time=datetime.now())\
+            ChatMessage.update(message_id=message_id, push_time=datetime.now(), is_newest=True)\
                 .where(ChatMessage.channel_id == channel_id)\
                 .execute()
         else:
-            ChatMessage.create(channel_id=channel_id, message_id=meessage_id, push_time=datetime.now())
+            ChatMessage.create(channel_id=channel_id, message_id=message_id, push_time=datetime.now(), is_newest=True)
 
     @staticmethod
-    def get_message_id(channel_id: int) -> int:
-        result = ChatMessage.get(ChatMessage.channel_id == channel_id)
-        return result.message_id
+    def set_message_invalidate(channel_id: int):
+        """设置频道消息过期
+        """
+        ChatMessage.update(is_newest=False)\
+            .where(ChatMessage.channel_id == channel_id)\
+            .execute()
