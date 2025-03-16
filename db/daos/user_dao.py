@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from db.models.user import User
-from db.models.channel import Channel
-from models.channel_dto import ChannelDTO
+from models.channel_dto import ChannelDTO, ChannelPage
 
 
 class UserDao:
@@ -21,13 +20,17 @@ class UserDao:
             .execute()
 
     @staticmethod
-    def get_user_channels(uid: int) -> list[ChannelDTO]:
+    def get_user_channels(uid: int, page: int, page_size: int = 5) -> ChannelPage:
         # 获取用户频道列表
-        result = User.get_or_none(User.id == uid).channels
 
-        list = []
-        if result != None:
-            for item in result:
-                list.append(ChannelDTO.from_model(item))
+        user = User.get_or_none(User.id == uid)
+        if not user:
+            return ChannelPage([], page, page_size, total=0)
 
-        return list
+        total = user.channels.count()
+        # 计算偏移量
+        offset = page * page_size
+        channels = user.channels.limit(page_size).offset(offset)
+        channel_list = [ChannelDTO.from_model(channel) for channel in channels]
+
+        return ChannelPage(channel_list, page, page_size, total)

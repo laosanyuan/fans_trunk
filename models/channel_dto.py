@@ -48,3 +48,14 @@ class ChannelDTO:
             is_banned=channel_model.is_banned,
             member_count=channel_model.member_count
         )
+
+
+class ChannelPage:
+    def __init__(self, channels: list[ChannelDTO], page: int, page_size: int, total: int) -> None:
+        self.channels = channels
+        self.page = page
+        self.page_size = page_size
+        self.total = total
+
+        self.is_first = page == 0
+        self.is_last = (page+1)*page_size >= total

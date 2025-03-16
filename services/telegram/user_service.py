@@ -30,7 +30,7 @@ class UserService:
             view_count = 0.05*member_count
             score = self._score_service.get_score(member_count, view_count)
             fleet = FleetDao.get_fleet_by_score(score)
-            ChannelDao.update_member_count(member_count, fleet.id)
+            ChannelDao.update_member_count(channel.id, member_count, fleet.id)
             await asyncio.sleep(1)
 
     async def _start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

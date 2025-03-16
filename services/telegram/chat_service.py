@@ -42,6 +42,7 @@ class ChatService:
             await self._application.bot.delete_message(channel_id, message_id)
         except Exception as e:
             print('删除消息失败')
+            print(e.with_traceback)
 
     async def _publish_message(self, channel_id: int) -> None:
         ad_service = inject.instance(AdService)
