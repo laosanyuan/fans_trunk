@@ -3,7 +3,6 @@ import asyncio
 from telegram import Update, ChatMemberUpdated
 from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler, ChatMemberHandler, Application
 from telegram.constants import ChatMemberStatus, ParseMode
-import inject
 
 from services.telegram.menu_strategies.menu_strategy_manager import MenuStrategyManager, ButtonEnum
 from services.telegram.score_service import ScoreService
@@ -38,11 +37,46 @@ class UserService:
         UserDao.add_user(uid=uid, user_name=user_name, full_name=full_name)
 
         message, reply_markup = await self._menu_strategy_manager.get_message_and_buttons(ButtonEnum.HOMEPAGE.value, uid)
-
-        await update.message.reply_text(message, reply_markup=reply_markup)
+        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
 
     async def _help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        pass
+        message = f'''
+✨ 欢迎使用【{self._application.bot.first_name}】——您的频道增长智能管家！
+🔥 精准流量匹配 | 公平透明机制 | 7×24小时护航
+
+🚀 核心功能
+✅ 全自动智能评级发车
+- 无需手动操作，系统实时监测频道数据，自动匹配最佳流量池
+- 告别低效车队，算法动态优化曝光权重，低分车队将被限制推广
+
+🔄 互推规则
+- 每小时发车 | 随机乱序排列
+- 更大流量池，区别于传统互推车选车模式，我们采用大型车队发车
+- 历史广告自动清理，避免信息过载
+- 每日自动同步粉丝数据，智能匹配新车队
+
+🌟 示例说明：
+假设您的某个频道被系统评级后分配到【黄金车队】，此时黄金车队中包含200个频道，合集成员数量300000人。
+1️⃣ 随机抓取
+- 每小时从200个频道库中动态抽取X个频道（X=10~20随机值）
+- 采用量子随机算法保证公平性
+2️⃣ 乱序轮播
+- 每次推送自动打乱频道排列顺序
+- 避免头部效应，确保平等曝光机会
+3️⃣ 累积覆盖
+- 72小时内 100%触达全部200个频道的300000人
+- 您的频道将同步出现在其他199个成员的推送列表
+
+⚠️ 违规高压线（触犯立即永久封禁）
+❗<b>诈骗/未成年相关/暴力/政治/军火/重口内容</b>
+
+🛡️ 郑重声明
+{self._application.bot.first_name}为完全免费项目，谨防付费诈骗！
+助力真实流量增长，我们永不收费！
+
+点击 /start 命令开始使用
+'''
+        await update.message.reply_text(message, parse_mode=ParseMode.HTML)
 
     async def _button_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query

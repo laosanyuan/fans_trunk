@@ -1,4 +1,5 @@
 from typing import Union
+import math
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Bot
 
@@ -46,7 +47,7 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 buttons.append(tmp)
 
             # 添加翻页按钮
-            message += f'\n\n您的频道数量：{channel_page.total}\n当前正处于第【{channel_page.page+1}】页'
+            message += f'\n\n您的频道数量：{channel_page.total}\n当前正处于第【{channel_page.page+1}/{math.ceil(channel_page.total/channel_page.page_size)}】页'
             page_buttons = []
             if not channel_page.is_first:
                 page_buttons.append(InlineKeyboardButton('👆 上一页', callback_data=f'{self.tag}#page%{channel_page.page-1}'))

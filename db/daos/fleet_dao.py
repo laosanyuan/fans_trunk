@@ -50,3 +50,18 @@ class FleetDao:
             Fleet.update(member_count=member_count, channel_count=channel_count)\
                 .where(Fleet.id == fleet.id)\
                 .execute()
+
+    @staticmethod
+    def get_channel_summary() -> tuple[int, int]:
+        """获取频道数据汇总
+
+        Returns:
+            tuple[int, int]: 频道数量，成员数量
+        """
+        fleets = Fleet.select()
+        channel_count = 0
+        member_count = 0
+        for fleet in fleets:
+            channel_count += fleet.channel_count
+            member_count += fleet.member_count
+        return channel_count, member_count

@@ -46,11 +46,14 @@ class ChatService:
 
     async def _publish_message(self, channel_id: int) -> None:
         ad_service = inject.instance(AdService)
+        body = self._generate_message(channel_id)
+        if body == None or body == '':
+            print('发车频道数量不足')
+            return
         # 文案部分
         fleet_name = f'\n<b>{self._application.bot.first_name}</b> - 精彩推送'
         head_ad = self._get_ad_message(ad_service.head_ads)
         tail_ad = self._get_ad_message(ad_service.tail_ads)
-        body = self._generate_message(channel_id)
         message = f'{fleet_name}\n{head_ad}\n{body}\n{tail_ad}'
 
         # 按钮部分
