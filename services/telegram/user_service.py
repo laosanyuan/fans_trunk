@@ -6,7 +6,7 @@ from telegram.constants import ChatMemberStatus, ParseMode
 import inject
 
 from services.telegram.menu_strategies.menu_strategy_manager import MenuStrategyManager, ButtonEnum
-from services.score_service import ScoreService
+from services.telegram.score_service import ScoreService
 from db.daos.user_dao import UserDao
 from db.daos.channel_dao import ChannelDao
 from db.daos.fleet_dao import FleetDao
@@ -16,7 +16,7 @@ class UserService:
     def __init__(self, application: Application):
         self._application = application
         self._menu_strategy_manager = MenuStrategyManager(self._application.bot)
-        self._score_service = inject.instance(ScoreService)
+        self._score_service = ScoreService(application)
 
         self._application.add_handler(CallbackQueryHandler(self._button_callback))
         self._application.add_handler(CommandHandler('start', self._start_command))
@@ -26,9 +26,7 @@ class UserService:
     async def update_all_user_data(self):
         channels = ChannelDao.get_all_validate_channels()
         for channel in channels:
-            member_count = await self._application.bot.get_chat_member_count(channel.id)
-            view_count = 0.05*member_count
-            score = self._score_service.get_score(member_count, view_count)
+            score, member_count = await self._score_service.get_score_and_member(channel.id)
             fleet = FleetDao.get_fleet_by_score(score)
             ChannelDao.update_member_count(channel.id, member_count, fleet.id)
             await asyncio.sleep(1)
@@ -79,10 +77,7 @@ class UserService:
                 else:
                     message = f'🚫 频道【{channel_title}】机器人权限发生变更，机器人时失去频道发车权限，请重新赋予正确权限后恢复发车！'
             else:
-                member_count = await self._application.bot.get_chat_member_count(channel_id)
-                # 暂未实现获取浏览量
-                view_count = 0.05*member_count
-                score = self._score_service.get_score(member_count, view_count)
+                score, member_count = await self._score_service.get_score_and_member(channel_id)
                 fleet = FleetDao.get_fleet_by_score(score)
 
                 ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id, has_permission, member_count)

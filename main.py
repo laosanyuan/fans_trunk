@@ -13,7 +13,6 @@ from services.wxpusher_service import WxPusherService
 from services.scheduler_manager import SchedulerManager
 from services.fleet_manager import FleetManager
 from services.telegram.bot_manager import BotManager
-from services.score_service import ScoreService
 from services.ad_service import AdService
 
 
@@ -26,7 +25,6 @@ def global_exception_handler(exctype, value, tb):
 
 def define_bindings(binder: inject.Binder):
     binder.bind(ConfigParser, ConfigParser('configs/settings.json'))
-    binder.bind_to_constructor(ScoreService, ScoreService)
     binder.bind_to_constructor(WxPusherService, WxPusherService)
     binder.bind_to_constructor(BotManager, BotManager)
     binder.bind(DbService, DbService("./configs/data.db"))
