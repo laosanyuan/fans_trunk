@@ -33,3 +33,8 @@ class ChatDao:
         ChatMessage.update(is_newest=False)\
             .where(ChatMessage.channel_id == channel_id)\
             .execute()
+        
+    @staticmethod
+    def delete_message(channel_id:int) -> None:
+        """删除频道消息"""
+        ChatMessage.delete().where(ChatMessage.channel_id == channel_id).execute()

@@ -43,6 +43,7 @@ class ChatService:
         except Exception as e:
             print('删除消息失败')
             print(e.with_traceback)
+            ChatDao.delete_message(channel_id)
 
     async def _publish_message(self, channel_id: int) -> None:
         ad_service = inject.instance(AdService)
