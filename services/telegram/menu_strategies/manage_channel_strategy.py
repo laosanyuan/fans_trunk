@@ -3,7 +3,7 @@ import math
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Bot
 
-from services.telegram.menu_strategies.base_strategy import BaseButtonStrategy, ButtonEnum
+from services.telegram.menu_strategies.base_strategy import BaseButtonStrategy
 from db.daos.user_dao import UserDao
 from db.daos.fleet_dao import FleetDao
 from db.daos.channel_dao import ChannelDao
@@ -55,7 +55,7 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 page_buttons.append(InlineKeyboardButton('👇 下一页', callback_data=f'{self.tag}#page%{channel_page.page+1}'))
             buttons.append(page_buttons)
 
-        buttons.append([InlineKeyboardButton('🏡 返回首页', callback_data=ButtonEnum.HOMEPAGE.value)])
+        buttons.append(self.get_home_button())
 
         if len(buttons) == 0:
             return message, None

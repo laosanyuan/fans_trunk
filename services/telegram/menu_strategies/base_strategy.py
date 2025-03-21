@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Union
 
-from telegram import InlineKeyboardMarkup
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 class ButtonEnum(Enum):
@@ -23,3 +23,11 @@ class BaseButtonStrategy(ABC):
     @abstractmethod
     async def handle_operation(self, sub_target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup], str]:
         pass
+
+
+    def get_home_button(self) -> list[InlineKeyboardButton]:
+        return [InlineKeyboardButton('🏡 返回首页', callback_data=ButtonEnum.HOMEPAGE.value)]
+    
+    def get_preview_button(self) -> list[InlineKeyboardButton]:
+        return [InlineKeyboardButton('👈 返回上一页',callback_data=self.tag),
+                InlineKeyboardButton('🏡 返回首页', callback_data=ButtonEnum.HOMEPAGE.value)]

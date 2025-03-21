@@ -28,14 +28,13 @@ class ChatService:
     async def _update_chat(self, channel_id: int) -> bool:
         chat: ChatMessageDTO = ChatDao.get_chat_message(channel_id)
         time_differece = datetime.now() - chat.push_time
-        if time_differece > timedelta(hours=1):
-            # 更新消息
+        is_more_than_hour = time_differece > timedelta(hours=1)
+        is_not_newest = (time_differece > timedelta(minutes=5) and not chat.is_newest)
+        if is_more_than_hour or is_not_newest:
+            # 超过1小时或者超过5分钟存在新消息覆盖，则更新消息
             await self._delete_message(channel_id, chat.message_id)
             await self._publish_message(channel_id)
-        elif time_differece > timedelta(minutes=5) and not chat.is_newest:
-            # 如果消息被覆盖，也更新消息
-            await self._delete_message(channel_id, chat.message_id)
-            await self._publish_message(channel_id)
+
 
     async def _delete_message(self, channel_id: int, message_id: int) -> None:
         try:

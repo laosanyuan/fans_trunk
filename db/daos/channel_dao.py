@@ -48,16 +48,13 @@ class ChannelDao:
         """获取推广频道数据列表
         """
         target_channel: Channel = Channel.get(Channel.id == channel_id)
-        channels = Fleet.get(Fleet.id == target_channel.fleet_id).channels
+        channels = (Fleet.get(Fleet.id == target_channel.fleet_id)
+                   .channels
+                   .where(Channel.id != channel_id)
+                   .order_by(Channel.fn.Random())  # 使用数据库随机排序
+                   .limit(count))
 
-        results = []
-        for channel in channels:
-            if channel.id == channel_id:
-                continue
-            results.append(ChannelDTO.from_model(channel))
-        random.shuffle(results)
-
-        return results
+        return [ChannelDTO.from_model(channel) for channel in channels]
 
     @staticmethod
     def update_member_count(channel_id: int, count: int, fleet_id: int) -> None:
@@ -66,3 +63,19 @@ class ChannelDao:
         Channel.update(member_count=count, fleet_id=fleet_id)\
             .where(Channel.id == channel_id)\
             .execute()
+
+    @staticmethod
+    def get_fleet_chanels(fleet_id: int, count: int = 30) -> list[ChannelDTO]:
+        """获取车队下的频道列表
+        """
+        channels = (Channel.select()
+                   .where(
+                       (Channel.fleet_id == fleet_id) &
+                       (Channel.is_access == True) &
+                       (Channel.is_banned == False) &
+                       (Channel.is_enable == True)
+                   )
+                   .order_by(Channel.member_count.desc())  # 按成员数量降序排序
+                   .limit(count))
+        
+        return [ChannelDTO.from_model(channel) for channel in channels]
