@@ -20,7 +20,7 @@ def global_exception_handler(exctype, value, tb):
     if exctype == SystemExit:
         return
     error_message = f"Exception Type: {exctype}\nMessage: {value}\nTraceback: {traceback.format_exc()}"
-    inject.instance(WxPusherService).push('Telegram推送服务崩溃', error_message)
+    inject.instance(WxPusherService).push('互推车服务崩溃', error_message)
 
 
 def define_bindings(binder: inject.Binder):
@@ -28,7 +28,7 @@ def define_bindings(binder: inject.Binder):
     binder.bind_to_constructor(WxPusherService, WxPusherService)
     binder.bind_to_constructor(BotManager, BotManager)
     binder.bind(DbService, DbService("./configs/data.db"))
-    binder.bind(FleetManager, FleetManager('configs/fleets.json'))
+    binder.bind(FleetManager, FleetManager('./configs/fleets.json'))
     binder.bind_to_constructor(SchedulerManager, SchedulerManager)
     binder.bind(AdService, AdService('./configs/ad_settings.json'))
     binder.bind(ChannelDataProvider, ChannelDataProvider('./configs/fake_users.json'))

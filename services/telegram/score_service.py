@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from telegram.ext import Application, ExtBot
 
+from db.daos.channel_dao import ChannelDao
 
 class ScoreService:
 
@@ -7,12 +10,17 @@ class ScoreService:
         self._bot: ExtBot = application.bot
 
     async def get_score_and_member(self, channel_id: int) -> tuple[int, int]:
-        # 获取分数和成员数量
+        # 获取分数和成员数量梯度分数
         member_count = await self._bot.get_chat_member_count(channel_id)
         score = self._get_score(member_count)
+
         # 根据管理员数量，目前数据不准
         admins = await self._bot.get_chat_administrators(channel_id)
         score -= (len(admins)-5)
+
+        # 每多使用30天增加一分
+        days = (datetime.now() - ChannelDao.get_channel(channel_id).add_time).days
+        score += days/30.0
 
         return max(0, int(score)), member_count
 

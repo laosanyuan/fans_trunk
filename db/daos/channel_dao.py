@@ -79,5 +79,14 @@ class ChannelDao:
         
         return [ChannelDTO.from_model(channel) for channel in channels]
     
+    @staticmethod
     def get_channels(count:int = 50) -> list[ChannelDTO]:
+        """获取成员数量多的频道列表降序返回
+        """
         channels = Channel.select.order_by(Channel.member_count.desc()).limit(count)
+
+    @staticmethod
+    def get_channel(id:int) -> ChannelDTO:
+        """获取频道数据
+        """
+        return ChannelDTO.from_model(Channel.get(Channel.id == id))
