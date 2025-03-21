@@ -1,5 +1,4 @@
 from datetime import datetime
-import random
 
 from db.models.channel import Channel
 from db.models.fleet import Fleet
@@ -80,3 +79,5 @@ class ChannelDao:
         
         return [ChannelDTO.from_model(channel) for channel in channels]
     
+    def get_channels(count:int = 50) -> list[ChannelDTO]:
+        channels = Channel.select.order_by(Channel.member_count.desc()).limit(count)

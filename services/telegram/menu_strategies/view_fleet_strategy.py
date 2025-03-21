@@ -12,7 +12,7 @@ from models.fleet_dto import FleetDTO
 from models.channel_dto import ChannelDTO
 
 
-class ManageFleetStrategy(BaseButtonStrategy):
+class ViewFleetStrategy(BaseButtonStrategy):
     def __init__(self, tag: str, bot: Bot) -> None:
         super().__init__(tag)
         self._bot = bot
@@ -52,7 +52,7 @@ class ManageFleetStrategy(BaseButtonStrategy):
     def _get_channel_list(self, fleet:FleetDTO, channels:list[ChannelDTO]) -> str:
         channel_count,member_count = inject.instance(ChannelDataProvider).get_fleet_summary(fleet.id)
         text = f"欢迎查看 {fleet.name} 实时数据！\n\n"
-        text += f"车队频道数量：{channel_count}\n车队成员数量：{member_count}\n车队准入评分范围：{fleet.min_score}~{fleet.max_score}/n/n"
+        text += f"车队频道数量：{channel_count}\n车队成员数量：{member_count}\n车队准入评分范围：{fleet.min_score}~{fleet.max_score}\n\n"
         text += "为节约服务器资源提供更好的互推服务，此处查看车队信息每次最多仅随机获取车队中的30个频道数据用以参考：\n"
         for index, item in enumerate(channels):
             text += f'{index+1}. <b><a href="https://t.me/{item.name}">{item.title}</a></b>\n'
