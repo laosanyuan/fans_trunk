@@ -2,8 +2,8 @@ from typing import Union
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Bot
 
+from services.fleet_service import FleetService
 from services.telegram.menu_strategies.base_strategy import BaseButtonStrategy, ButtonEnum
-from db.daos.fleet_dao import FleetDao
 
 
 class HomepageStrategy(BaseButtonStrategy):
@@ -19,7 +19,8 @@ class HomepageStrategy(BaseButtonStrategy):
         ]
         markup = InlineKeyboardMarkup(keyboard)
 
-        channel_count, member_count = FleetDao.get_channel_summary()
+
+        channel_count, member_count = FleetService.get_all_summary()
         message = f'''
 ✨ 欢迎使用【{self._bot.first_name}】——您的频道增长智能管家！
 🔥 精准流量匹配 | 公平透明机制 | 7×24小时护航
