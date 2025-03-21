@@ -24,10 +24,9 @@ class BaseButtonStrategy(ABC):
     async def handle_operation(self, sub_target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup], str]:
         pass
 
-
     def get_home_button(self) -> list[InlineKeyboardButton]:
         return [InlineKeyboardButton('🏡 返回首页', callback_data=ButtonEnum.HOMEPAGE.value)]
-    
+
     def get_preview_button(self) -> list[InlineKeyboardButton]:
-        return [InlineKeyboardButton('👈 返回上一页',callback_data=self.tag),
+        return [InlineKeyboardButton('👈 返回上一页', callback_data=self.tag),
                 InlineKeyboardButton('🏡 返回首页', callback_data=ButtonEnum.HOMEPAGE.value)]

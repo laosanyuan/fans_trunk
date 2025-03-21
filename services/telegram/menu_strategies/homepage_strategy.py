@@ -1,6 +1,7 @@
 from typing import Union
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Bot
+import inject
 
 from services.channel_data_provider import ChannelDataProvider
 from services.telegram.menu_strategies.base_strategy import BaseButtonStrategy, ButtonEnum
@@ -19,8 +20,7 @@ class HomepageStrategy(BaseButtonStrategy):
         ]
         markup = InlineKeyboardMarkup(keyboard)
 
-
-        channel_count, member_count = ChannelDataProvider.get_all_summary()
+        channel_count, member_count = inject.instance(ChannelDataProvider).get_all_summary()
         message = f'''
 ✨ 欢迎使用【{self._bot.first_name}】——您的频道增长智能管家！
 🔥 精准流量匹配 | 公平透明机制 | 7×24小时护航

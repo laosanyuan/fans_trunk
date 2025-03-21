@@ -47,9 +47,9 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 tmp.append(InlineKeyboardButton('🗑️ 删除', callback_data=f'{self.tag}#delete_channel%{item.id}'))
                 buttons.append(tmp)
 
-                message_lines += f'🏆 {item.title}({flag})：{item.score}\n'
+                message_lines += f'{flag} <b><a href="https://t.me/{item.name}">{item.title}</a></b>：{item.score}\n'
             
-            message += '以下是你本页频道当前系统评级分数：\n'
+            message += '\n\n以下是你本页频道当前系统评级分数：\n'
             message += message_lines
             message += f'\n\n您的频道数量：{channel_page.total}\n当前正处于第【{channel_page.page+1}/{math.ceil(channel_page.total/channel_page.page_size)}】页'
             # 添加翻页按钮

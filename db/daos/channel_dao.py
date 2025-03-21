@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from peewee import fn
+
 from db.models.channel import Channel
 from db.models.fleet import Fleet
 from models.channel_dto import ChannelDTO
@@ -8,7 +10,7 @@ from models.channel_dto import ChannelDTO
 class ChannelDao:
     # 添加用户
     @staticmethod
-    def add_channel(uid: int, channel_id: int, name: str, title: str, fleet_id: int, has_permission: bool, member_count: int) -> None:
+    def add_channel(uid: int, channel_id: int, name: str, title: str, fleet_id: int, has_permission: bool, score: int, member_count: int) -> None:
         is_exists = Channel.select().where(Channel.id == channel_id).exists()
         if not is_exists:
             Channel.create(
@@ -18,6 +20,7 @@ class ChannelDao:
                 user_id=uid,
                 fleet_id=fleet_id,
                 is_access=has_permission,
+                score=score,
                 add_time=datetime.now(),
                 member_count=member_count)
 
@@ -48,10 +51,10 @@ class ChannelDao:
         """
         target_channel: Channel = Channel.get(Channel.id == channel_id)
         channels = (Fleet.get(Fleet.id == target_channel.fleet_id)
-                   .channels
-                   .where(Channel.id != channel_id)
-                   .order_by(Channel.fn.Random())  # 使用数据库随机排序
-                   .limit(count))
+                    .channels
+                    .where(Channel.id != channel_id)
+                    .order_by(fn.Random())  # 使用数据库随机排序
+                    .limit(count))
 
         return [ChannelDTO.from_model(channel) for channel in channels]
 
@@ -68,25 +71,27 @@ class ChannelDao:
         """获取车队下的频道列表
         """
         channels = (Channel.select()
-                   .where(
-                       (Channel.fleet_id == fleet_id) &
-                       (Channel.is_access == True) &
-                       (Channel.is_banned == False) &
-                       (Channel.is_enable == True)
-                   )
-                   .order_by(Channel.member_count.desc())  # 按成员数量降序排序
-                   .limit(count))
-        
+                    .where(
+            (Channel.fleet_id == fleet_id) &
+            (Channel.is_access == True) &
+            (Channel.is_banned == False) &
+            (Channel.is_enable == True)
+        )
+            .order_by(Channel.member_count.desc())  # 按成员数量降序排序
+            .limit(count))
+
         return [ChannelDTO.from_model(channel) for channel in channels]
-    
-    @staticmethod
-    def get_channels(count:int = 50) -> list[ChannelDTO]:
-        """获取成员数量多的频道列表降序返回
-        """
-        channels = Channel.select.order_by(Channel.member_count.desc()).limit(count)
 
     @staticmethod
-    def get_channel(id:int) -> ChannelDTO:
+    def get_channels(count: int = 50) -> list[ChannelDTO]:
+        """获取成员数量多的频道列表降序返回
+        """
+        channels = Channel.select().order_by(Channel.member_count.desc()).limit(count)
+
+        return [ChannelDTO.from_model(item) for item in channels]
+
+    @staticmethod
+    def get_channel(id: int) -> ChannelDTO:
         """获取频道数据
         """
         return ChannelDTO.from_model(Channel.get(Channel.id == id))

@@ -28,10 +28,10 @@ class UserService:
         channels = ChannelDao.get_all_validate_channels()
         for channel in channels:
             score, member_count = await self._score_service.get_score_and_member(channel.id)
-            
+
             fleet = FleetDao.get_fleet_by_score(score)
             ChannelDao.update_member_count(channel.id, member_count, fleet.id)
-            
+
             if fleet.id != channel.fleet_id:
                 # 车队数据发生变更时通知用户
                 before_fleet = FleetDao.get_fleet_by_id(channel.fleet_id)
@@ -44,7 +44,7 @@ class UserService:
                     chat_id=channel.user_id,
                     text=message,
                     parse_mode=ParseMode.HTML)
-                
+
             await asyncio.sleep(1)
 
     async def _start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,7 +54,12 @@ class UserService:
         UserDao.add_user(uid=uid, user_name=user_name, full_name=full_name)
 
         message, reply_markup = await self._menu_strategy_manager.get_message_and_buttons(ButtonEnum.HOMEPAGE.value, uid)
-        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
+        await update.message.reply_text(
+            message,
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True
+        )
 
     async def _help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         message = f'''
@@ -112,7 +117,9 @@ class UserService:
             await query.edit_message_text(
                 text=result[0],
                 reply_markup=result[1],
-                parse_mode=ParseMode.HTML)
+                parse_mode=ParseMode.HTML,
+                disable_web_page_preview=True
+            )
 
     async def _track_chat_member(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 处理添加移除机器人
@@ -136,7 +143,7 @@ class UserService:
                 score, member_count = await self._score_service.get_score_and_member(channel_id)
                 fleet = FleetDao.get_fleet_by_score(score)
 
-                ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id, has_permission, member_count)
+                ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id, has_permission, score, member_count)
                 FleetDao.update_fleets_data()
 
                 if has_permission:

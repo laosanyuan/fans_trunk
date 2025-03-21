@@ -4,6 +4,7 @@ from telegram.ext import Application, ExtBot
 
 from db.daos.channel_dao import ChannelDao
 
+
 class ScoreService:
 
     def __init__(self, application: Application) -> None:
@@ -19,8 +20,9 @@ class ScoreService:
         score -= (len(admins)-5)
 
         # 每多使用30天增加一分
-        days = (datetime.now() - ChannelDao.get_channel(channel_id).add_time).days
-        score += days/30.0
+        if ChannelDao.is_exists(channel_id):
+            days = (datetime.now() - ChannelDao.get_channel(channel_id).add_time).days
+            score += days/30.0
 
         return max(0, int(score)), member_count
 
