@@ -27,6 +27,7 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 "🔥 添加机器人到频道", url=f'{self._bot.link}?startchannel&admin=post_messages+edit_messages+delete_messages+invite_users')])
         else:
             # 添加频道数据
+            message_lines = ''
             for item in channel_page.channels:
                 tmp = []
                 flag = ""
@@ -46,8 +47,12 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 tmp.append(InlineKeyboardButton('🗑️ 删除', callback_data=f'{self.tag}#delete_channel%{item.id}'))
                 buttons.append(tmp)
 
-            # 添加翻页按钮
+                message_lines += f'🏆 {item.title}({flag})：{item.score}\n'
+            
+            message += '以下是你本页频道当前系统评级分数：\n'
+            message += message_lines
             message += f'\n\n您的频道数量：{channel_page.total}\n当前正处于第【{channel_page.page+1}/{math.ceil(channel_page.total/channel_page.page_size)}】页'
+            # 添加翻页按钮
             page_buttons = []
             if not channel_page.is_first:
                 page_buttons.append(InlineKeyboardButton('👆 上一页', callback_data=f'{self.tag}#page%{channel_page.page-1}'))
