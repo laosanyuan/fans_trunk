@@ -6,7 +6,7 @@ from datetime import datetime
 from db.daos.fleet_dao import FleetDao
 from models.channel_dto import ChannelDTO
 
-class FleetService:
+class ChannelDataProvider:
     def __init__(self, fake_users_path:str = None) -> None:
         self._fake_users_path = fake_users_path
         self._fake_users = []

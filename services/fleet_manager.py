@@ -13,6 +13,6 @@ class FleetManager:
         for item in datas:
             FleetDao.update_fleet(item['id'], item['name'], item['min_score'], item['max_score'])
 
-    async def update_fleets_data(self) -> None:
+    def update_fleets_data(self) -> None:
         # 更新车队数据
         FleetDao.update_fleets_data()

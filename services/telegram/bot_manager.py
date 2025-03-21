@@ -23,3 +23,8 @@ class BotManager:
 
     async def run(self):
         self._application.run_polling(close_loop=False)
+
+    def get_bot_name(self) -> str:
+       """互推车名称
+       """
+       return self._application.bot.first_name

@@ -4,7 +4,7 @@ import random
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Bot
 import inject
 
-from services.fleet_service import FleetService
+from services.channel_data_provider import ChannelDataProvider
 from services.telegram.menu_strategies.base_strategy import BaseButtonStrategy
 from db.daos.fleet_dao import FleetDao
 from db.daos.channel_dao import ChannelDao
@@ -35,7 +35,7 @@ class ManageFleetStrategy(BaseButtonStrategy):
             channels = ChannelDao.get_fleet_chanels(fleet_id,15)
             if len(channels) < 30:
                 # 数据真假各一半
-                fakes = inject.instance(FleetService).get_fake_users(fleet.min_score,fleet.max_score,30-len(channels))
+                fakes = inject.instance(ChannelDataProvider).get_fake_users(fleet.min_score,fleet.max_score,30-len(channels))
                 channels.extend(fakes)
             random.shuffle(channels)
             return self._get_channel_list(fleet, channels), [self.get_preview_button]
@@ -50,7 +50,7 @@ class ManageFleetStrategy(BaseButtonStrategy):
         return results
     
     def _get_channel_list(self, fleet:FleetDTO, channels:list[ChannelDTO]) -> str:
-        channel_count,member_count = inject.instance(FleetService).get_fleet_summary(fleet.id)
+        channel_count,member_count = inject.instance(ChannelDataProvider).get_fleet_summary(fleet.id)
         text = f"欢迎查看 {fleet.name} 实时数据！\n\n"
         text += f"车队频道数量：{channel_count}\n车队成员数量：{member_count}\n车队准入评分范围：{fleet.min_score}~{fleet.max_score}/n/n"
         text += "为节约服务器资源提供更好的互推服务，此处查看车队信息每次最多仅随机获取车队中的30个频道数据用以参考：\n"

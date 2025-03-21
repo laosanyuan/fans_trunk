@@ -79,3 +79,4 @@ class ChannelDao:
                    .limit(count))
         
         return [ChannelDTO.from_model(channel) for channel in channels]
+    

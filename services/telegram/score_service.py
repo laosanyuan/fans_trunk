@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from telegram.ext import Application, ExtBot
 
 

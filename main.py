@@ -14,7 +14,7 @@ from services.scheduler_manager import SchedulerManager
 from services.fleet_manager import FleetManager
 from services.telegram.bot_manager import BotManager
 from services.ad_service import AdService
-from services.fleet_service import FleetService
+from services.channel_data_provider import ChannelDataProvider
 
 def global_exception_handler(exctype, value, tb):
     if exctype == SystemExit:
@@ -31,7 +31,7 @@ def define_bindings(binder: inject.Binder):
     binder.bind(FleetManager, FleetManager('configs/fleets.json'))
     binder.bind_to_constructor(SchedulerManager, SchedulerManager)
     binder.bind(AdService, AdService('./configs/ad_settings.json'))
-    binder.bind(FleetService, FleetService('./configs/fake_users.json'))
+    binder.bind(ChannelDataProvider, ChannelDataProvider('./configs/fake_users.json'))
 
 
 async def main():
