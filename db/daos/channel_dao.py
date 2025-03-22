@@ -5,6 +5,7 @@ from peewee import fn
 from db.models.channel import Channel
 from db.models.fleet import Fleet
 from models.channel_dto import ChannelDTO
+from models.fleet_dto import FleetDTO
 
 
 class ChannelDao:
@@ -95,3 +96,10 @@ class ChannelDao:
         """获取频道数据
         """
         return ChannelDTO.from_model(Channel.get(Channel.id == id))
+
+    @staticmethod
+    def get_channel_fleet(id: int) -> FleetDTO:
+        """获取频道所在车队
+        """
+        result = Channel.get(Channel.id == id).fleet
+        return FleetDTO.from_model(result)

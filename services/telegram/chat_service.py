@@ -9,10 +9,12 @@ from db.daos.channel_dao import ChannelDao
 from db.daos.chat_dao import ChatDao
 from models.chat_message_dto import ChatMessageDTO
 from services.ad_service import AdService, AdConfig
+from services.channel_data_provider import ChannelDataProvider
 
 
 class ChatService:
     def __init__(self, application: Application):
+        self._channel_data_provider = inject.instance(ChannelDataProvider)
         self._application = application
         self._application.add_handler(MessageHandler(TEXT & (~COMMAND), self._handle_new_message))
 
@@ -34,7 +36,6 @@ class ChatService:
             # 超过1小时或者超过5分钟存在新消息覆盖，则更新消息
             await self._delete_message(channel_id, chat.message_id)
             await self._publish_message(channel_id)
-
 
     async def _delete_message(self, channel_id: int, message_id: int) -> None:
         try:
@@ -78,6 +79,12 @@ class ChatService:
 
     def _generate_message(self, channel_id) -> str:
         results = ChannelDao.get_message_channels(channel_id)
+
+        if len(results) <= 3:
+            # 如果有效频道太少，使用假数据补充
+            fleet = ChannelDao.get_channel_fleet(channel_id)
+            results += self._channel_data_provider.get_fake_users(fleet.min_score, fleet.max_score, 5)
+
         message = ''
         for index, channel in enumerate(results):
             tmp = f'{index+1}. <b><a href="https://t.me/{channel.name}">{channel.title}</a></b>\n'
