@@ -11,8 +11,7 @@ from db.daos.channel_dao import ChannelDao
 
 class ManageChannelStrategy(BaseButtonStrategy):
     def __init__(self, tag: str, bot: Bot) -> None:
-        super().__init__(tag)
-        self._bot = bot
+        super().__init__(tag, bot)
 
     async def get_message_and_buttons(self,
                                       uid: int,
@@ -23,8 +22,6 @@ class ManageChannelStrategy(BaseButtonStrategy):
         buttons = []
         if channel_page == None or channel_page.total <= 0:
             message = '您还没有添加任何频道到车队，请添加频道后再查看！'
-            buttons.append([InlineKeyboardButton(
-                "🔥 添加机器人到频道", url=f'{self._bot.link}?startchannel&admin=post_messages+edit_messages+delete_messages+invite_users')])
         else:
             # 添加频道数据
             message_lines = ''
@@ -48,7 +45,7 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 buttons.append(tmp)
 
                 message_lines += f'{flag} <b><a href="https://t.me/{item.name}">{item.title}</a></b>：{item.score}\n'
-            
+
             message += '\n\n以下是你本页频道当前系统评级分数：\n'
             message += message_lines
             message += f'\n\n您的频道数量：{channel_page.total}\n当前正处于第【{channel_page.page+1}/{math.ceil(channel_page.total/channel_page.page_size)}】页'
@@ -60,6 +57,7 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 page_buttons.append(InlineKeyboardButton('👇 下一页', callback_data=f'{self.tag}#page%{channel_page.page+1}'))
             buttons.append(page_buttons)
 
+        buttons.append([self.get_add_channel_button()])
         buttons.append(self.get_home_button())
 
         if len(buttons) == 0:
@@ -82,7 +80,7 @@ class ManageChannelStrategy(BaseButtonStrategy):
                 # 删除频道
                 channel_id = int(strs[1])
                 ChannelDao.remove_channel(channel_id)
-                await self._bot.leave_chat(channel_id)
+                await self.bot.leave_chat(channel_id)
                 return await self.get_message_and_buttons(uid, message='频道删除成功，以下是更新后的频道列表（如果频道数据存在错误，可删除后重新添加）：')
             elif strs[0] == 'page':
                 # 翻页

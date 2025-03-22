@@ -14,22 +14,23 @@ from models.channel_dto import ChannelDTO
 
 class ViewFleetStrategy(BaseButtonStrategy):
     def __init__(self, tag: str, bot: Bot) -> None:
-        super().__init__(tag)
-        self._bot = bot
+        super().__init__(tag, bot)
         self._channel_data_provider = inject.instance(ChannelDataProvider)
 
     async def get_message_and_buttons(self, uid: int) -> Union[tuple[str, InlineKeyboardMarkup], str]:
         keyboard = self._get_fleet_buttons()
+        keyboard.append([self.get_add_channel_button()])
         keyboard.append(self.get_home_button())
         markup = InlineKeyboardMarkup(keyboard)
 
-        message = f'欢迎使用，以下是【{self._bot.first_name}】当前车队数据。\n点击对应车队按钮，可以查看车队详情！'
+        message = f'欢迎使用，以下是【{self.bot.first_name}】当前车队数据。\n点击对应车队按钮，可以查看车队详情！'
         message += '\n\n * 注意，本数据只代表当前情况，全部数据将随着用户的使用情况实时更新'
 
         return message, markup
 
     async def handle_operation(self, sub_target: str, uid: int) -> Union[tuple[str, InlineKeyboardMarkup], str]:
         strs = sub_target.split('%')
+        markup = InlineKeyboardMarkup([[self.get_add_channel_button()], self.get_preview_button()])
         if strs[0] == 'fleet':
             fleet_id = int(strs[1])
             fleet = FleetDao.get_fleet_by_id(fleet_id)
@@ -39,8 +40,8 @@ class ViewFleetStrategy(BaseButtonStrategy):
                 fakes = self._channel_data_provider.get_fake_users(fleet.min_score, fleet.max_score, 30-len(channels))
                 channels.extend(fakes)
             random.shuffle(channels)
-            return self._get_channel_list(fleet, channels), InlineKeyboardMarkup([self.get_preview_button()])
-        return '未知错误', InlineKeyboardMarkup([self.get_preview_button()])
+            return self._get_channel_list(fleet, channels), markup
+        return '未知错误', markup
 
     def _get_fleet_buttons(self) -> list:
         fleets: list[FleetDTO] = FleetDao.get_all_fleets()
