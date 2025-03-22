@@ -52,7 +52,7 @@ class SchedulerManager:
         message += f'频道数量：{channels}\n成员数量：{members}\n'
         message += f'频道变化：{(channels - self._preview_channel_count):+}\n成员变化：{(members - self._preview_member_count):+}'
 
-        WxPusherService.push(f'{self._bot_manager.get_bot_name()} - 互推车日报', message)
+        self._wx_pusher.push(f'{self._bot_manager.get_bot_name()} - 互推车日报', message)
 
         self._preview_channel_count = channels
         self._preview_member_count = members
