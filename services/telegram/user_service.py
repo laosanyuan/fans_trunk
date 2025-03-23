@@ -3,7 +3,9 @@ import asyncio
 from telegram import Update, ChatMemberUpdated
 from telegram.ext import CommandHandler, ContextTypes, CallbackQueryHandler, ChatMemberHandler, Application
 from telegram.constants import ChatMemberStatus, ParseMode
+import inject
 
+from services.channel_data_provider import ChannelDataProvider
 from services.telegram.menu_strategies.menu_strategy_manager import MenuStrategyManager, ButtonEnum
 from services.telegram.score_service import ScoreService
 from db.daos.user_dao import UserDao
@@ -16,6 +18,7 @@ class UserService:
         self._application = application
         self._menu_strategy_manager = MenuStrategyManager(self._application.bot)
         self._score_service = ScoreService(application)
+        self._channel_data_provider = inject.instance(ChannelDataProvider)
 
         self._application.add_handler(CallbackQueryHandler(self._button_callback))
         self._application.add_handler(CommandHandler('start', self._start_command))
@@ -142,6 +145,7 @@ class UserService:
             else:
                 score, member_count = await self._score_service.get_score_and_member(channel_id)
                 fleet = FleetDao.get_fleet_by_score(score)
+                fake_channels, fake_members = self._channel_data_provider.get_fleet_summary(fleet.id)
 
                 ChannelDao.add_channel(uid, channel_id, channel_name, channel_title, fleet.id, has_permission, score, member_count)
                 FleetDao.update_fleets_data()
@@ -149,7 +153,7 @@ class UserService:
                 if has_permission:
                     message = f'''🎉 恭喜您，添加频道成功！
 
-系统根据您的频道数据智能评级，【<b>{channel_title}</b>】当前的得分为<b>{score}</b>，分配于<b>{fleet.name}</b>，本车队包含频道数量：<b>{fleet.channel_count}</b>，合计覆盖成员数量：<b>{fleet.member_count}</b>！
+系统根据您的频道数据智能评级，【<b>{channel_title}</b>】当前的得分为<b>{score}</b>，分配于<b>{fleet.name}</b>，本车队包含频道数量：<b>{fake_channels}</b>，合计覆盖成员数量：<b>{fake_members}</b>！
 
 注意，当前的评分和分配车队都是基于此频道目前的数据计算得出，随着数据的变化，评分和分配车队随时也会随时发生变化。
 

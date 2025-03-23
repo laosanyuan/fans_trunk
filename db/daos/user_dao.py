@@ -34,7 +34,7 @@ class UserDao:
         channel_list = [ChannelDTO.from_model(channel) for channel in channels]
 
         return ChannelPage(channel_list, page, page_size, total)
-    
+
     @staticmethod
     def get_user_count() -> int:
         """获取系统中的用户数量

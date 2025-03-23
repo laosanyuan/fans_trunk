@@ -24,7 +24,10 @@ class ScoreService:
             days = (datetime.now() - ChannelDao.get_channel(channel_id).add_time).days
             score += days/30.0
 
-        return max(0, int(score)), member_count
+        final_score = max(0, int(score))
+        ChannelDao.update_score(channel_id, final_score)
+
+        return final_score, member_count
 
     def _get_score(self, member_count: int) -> int:
         base_core = 0

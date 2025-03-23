@@ -103,3 +103,10 @@ class ChannelDao:
         """
         result = Channel.get(Channel.id == id).fleet
         return FleetDTO.from_model(result)
+
+    @staticmethod
+    def update_score(channel_id: int, score: int) -> None:
+        """更新评分
+        """
+        if ChannelDao.is_exists():
+            Channel.update(score=score).where(Channel.id == channel_id).execute()
