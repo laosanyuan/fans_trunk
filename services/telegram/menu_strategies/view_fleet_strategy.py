@@ -58,5 +58,5 @@ class ViewFleetStrategy(BaseButtonStrategy):
         text += f"车队频道数量：{channel_count}\n车队成员数量：{member_count}\n车队准入评分范围：{fleet.min_score}~{fleet.max_score}\n\n"
         text += "为节约服务器资源提供更好的互推服务，此处查看车队信息每次最多仅随机获取车队中的30个频道数据用以参考：\n"
         for index, item in enumerate(channels):
-            text += f'{index+1}. <b><a href="https://t.me/{item.name}">{item.title}</a></b> - {item.member_count}\n'
+            text += f'{index+1}. <b><a href="https://t.me/{item.name}">{item.title}</a></b> - 【成员：{item.member_count}，分数：{item.score}】\n'
         return text

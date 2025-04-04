@@ -20,7 +20,7 @@ class UserDao:
             .execute()
 
     @staticmethod
-    def get_user_channels(uid: int, page: int, page_size: int = 5) -> ChannelPage:
+    def get_user_channels(uid: int, page: int, page_size: int = 10) -> ChannelPage:
         # 获取用户频道列表
 
         user = User.get_or_none(User.id == uid)
