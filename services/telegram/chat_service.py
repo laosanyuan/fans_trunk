@@ -4,6 +4,7 @@ import asyncio
 from telegram.ext import MessageHandler, Application
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext.filters import TEXT, COMMAND
+from telegram.constants import ParseMode
 import inject
 
 from db.daos.channel_dao import ChannelDao
@@ -66,18 +67,25 @@ class ChatService:
         button_list.append([InlineKeyboardButton('🎁 加入互推 🎁', self._application.bot.link)])
         markup = InlineKeyboardMarkup(button_list)
 
-        result = await self._application.bot.send_message(
-            chat_id=channel_id,
-            text=message,
-            parse_mode='HTML',
-            write_timeout=60,
-            connect_timeout=60,
-            pool_timeout=60,
-            read_timeout=60,
-            disable_web_page_preview=True,
-            reply_markup=markup)
-
-        ChatDao.update_publish_message(channel_id, result.message_id)
+        try:
+            result = await self._application.bot.send_message(
+                chat_id=channel_id,
+                text=message,
+                parse_mode='HTML',
+                write_timeout=60,
+                connect_timeout=60,
+                pool_timeout=60,
+                read_timeout=60,
+                disable_web_page_preview=True,
+                reply_markup=markup)
+            ChatDao.update_publish_message(channel_id, result.message_id)
+        except Exception as e:
+            channel = ChannelDao.get_channel(channel_id)
+            await self._application.bot.send_message(
+                chat_id=channel.user_id,
+                text=f"您的频道【{channel.title}】由于发布推送消息失败，暂时移出车队。原因可能为权限错误，您可以重新拉入机器人并设置正确权限恢复功能！",
+                parse_mode=ParseMode.HTML)
+            ChannelDao.remove_channel(channel_id)
 
     def _generate_message(self, channel_id) -> str:
         results = ChannelDao.get_message_channels(channel_id)

@@ -32,7 +32,7 @@ class SchedulerManager:
                                 max_instances=1)
         # 检查频道消息
         self._scheduler.add_job(self._check_channel_message,
-                                IntervalTrigger(minutes=3),
+                                IntervalTrigger(minutes=10),
                                 max_instances=1)
 
     def start(self):
