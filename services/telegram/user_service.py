@@ -39,7 +39,7 @@ class UserService:
                 # 车队数据发生变更时通知用户
                 before_fleet = FleetDao.get_fleet_by_id(channel.fleet_id)
                 message = ''
-                if score > before_fleet.max_score:
+                if score >= before_fleet.max_score:
                     message = f'🎉 恭喜，您的频道【{channel.title}】由于数据良好，系统评级得到提升，当前分数为{score}！\n现将您的车队从原来的<b>{before_fleet.name}</b>升级到<b>{fleet.name}</b>！！！\n\n请您再接再励，车队等级提升将会为您带来更优质的曝光和流量！！'
                 else:
                     message = f'💔 很遗憾，由于您的频道【{channel.title}】质量下降，系统已更新您频道的评级，当前分数为{score}！\n现将您的频道从<b>{before_fleet.name}</b>降级到<b>{fleet.name}</b>！！！\n\n为了提升您的推广效果，请注意您的频道运营数据，优质的频道数据和评级将会得到系统更多和更优质的曝光效果！'
