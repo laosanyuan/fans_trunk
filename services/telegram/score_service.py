@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from telegram.ext import Application, ExtBot
+from telegram.error import BadRequest
 
 from db.daos.channel_dao import ChannelDao
 
@@ -11,23 +12,29 @@ class ScoreService:
         self._bot: ExtBot = application.bot
 
     async def get_score_and_member(self, channel_id: int) -> tuple[int, int]:
-        # 获取分数和成员数量梯度分数
-        member_count = await self._bot.get_chat_member_count(channel_id)
-        score = self._get_score(member_count)
+        try:
+            # 获取分数和成员数量梯度分数
+            member_count = await self._bot.get_chat_member_count(channel_id)
+            score = self._get_score(member_count)
 
-        # 根据管理员数量，目前数据不准
-        admins = await self._bot.get_chat_administrators(channel_id)
-        score -= (len(admins)-5)
+            # 根据管理员数量，目前数据不准
+            admins = await self._bot.get_chat_administrators(channel_id)
+            score -= (len(admins)-5)
 
-        # 每多使用30天增加一分
-        if ChannelDao.is_exists(channel_id):
-            days = (datetime.now() - ChannelDao.get_channel(channel_id).add_time).days
-            score += days/30.0
+            # 每多使用30天增加一分
+            if ChannelDao.is_exists(channel_id):
+                days = (datetime.now() - ChannelDao.get_channel(channel_id).add_time).days
+                score += days/30.0
 
-        final_score = max(0, int(score))
-        ChannelDao.update_score(channel_id, final_score)
-
-        return final_score, member_count
+            final_score = max(0, int(score))
+            ChannelDao.update_score(channel_id, final_score)
+            return final_score, member_count
+        except BadRequest as e:
+            if e.message == 'Chat not found':
+                print(f'频道已不存在:{channel_id}，移出列表')
+                ChannelDao.remove_channel(channel_id)
+            return 0, 0
+            
 
     def _get_score(self, member_count: int) -> int:
         base_core = 0

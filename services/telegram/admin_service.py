@@ -23,12 +23,12 @@ class AdminService:
 
         if user_name == self._admin_user:
             users = UserDao.get_user_count()
-            channels, memebers = FleetDao.get_channel_summary()
+            _, memebers = FleetDao.get_channel_summary()
+            tmp_channels = ChannelDao.get_channels()
 
-            message = f'用户数量：{users}\n频道数量：{channels}\n成员数量：{memebers}\n\n'
+            message = f'用户数量：{users}\n频道数量：{len(tmp_channels)}\n成员数量：{memebers}\n\n'
             message += '以下是成员数量前50的频道数据：\n'
 
-            tmp_channels = ChannelDao.get_channels()
             for index, item in enumerate(tmp_channels):
                 message += f'{index+1}. <b><a href="https://t.me/{item.name}">{item.title}</a></b> - {item.member_count}\n'
 

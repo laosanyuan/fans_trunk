@@ -31,7 +31,7 @@ def define_bindings(binder: inject.Binder):
     binder.bind(FleetManager, FleetManager('./configs/fleets.json'))
     binder.bind_to_constructor(SchedulerManager, SchedulerManager)
     binder.bind(AdService, AdService('./configs/ad_settings.json'))
-    binder.bind(ChannelDataProvider, ChannelDataProvider('./configs/fake_users.json'))
+    binder.bind_to_constructor(ChannelDataProvider, ChannelDataProvider)
 
 
 async def main():

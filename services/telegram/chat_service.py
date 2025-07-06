@@ -5,6 +5,7 @@ from telegram.ext import MessageHandler, Application
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
+from telegram.error import Forbidden, BadRequest
 import inject
 
 from db.daos.channel_dao import ChannelDao
@@ -43,6 +44,10 @@ class ChatService:
     async def _delete_message(self, channel_id: int, message_id: int) -> None:
         try:
             await self._application.bot.delete_message(channel_id, message_id)
+        except BadRequest as e:
+            tmp = ChannelDao.get_channel(channel_id)
+            print(f'频道已不存在:{tmp.title}，移出列表')
+            ChannelDao.remove_channel(channel_id)
         except Exception as e:
             print('删除消息失败')
             print(e.with_traceback)
@@ -79,21 +84,27 @@ class ChatService:
                 disable_web_page_preview=True,
                 reply_markup=markup)
             ChatDao.update_publish_message(channel_id, result.message_id)
-        except Exception as e:
-            channel = ChannelDao.get_channel(channel_id)
+        except Forbidden as e:
+            tmp = ChannelDao.get_channel(channel_id)
             await self._application.bot.send_message(
-                chat_id=channel.user_id,
-                text=f"您的频道【{channel.title}】由于发布推送消息失败，暂时移出车队。原因可能为权限错误，您可以重新拉入机器人并设置正确权限恢复功能！",
+                chat_id=tmp.user_id,
+                text=f"您的频道【{tmp.title}】由于权限错误，无法发送互推消息！如果需要继续使用，您可以重新拉入机器人并设置正确权限恢复功能！",
+                parse_mode=ParseMode.HTML)
+            ChannelDao.remove_channel(channel_id)
+        except BadRequest as e:
+            tmp = ChannelDao.get_channel(channel_id)
+            print(f'频道已不存在:{tmp.title}，移出列表')
+            ChannelDao.remove_channel(channel_id)
+        except Exception as e:
+            tmp = ChannelDao.get_channel(channel_id)
+            await self._application.bot.send_message(
+                chat_id=tmp.user_id,
+                text=f"您的频道【{tmp.title}】由于发布推送消息失败，暂时移出车队。原因可能为权限错误，您可以重新拉入机器人并设置正确权限恢复功能！",
                 parse_mode=ParseMode.HTML)
             ChannelDao.remove_channel(channel_id)
 
     def _generate_message(self, channel_id) -> str:
         results = ChannelDao.get_message_channels(channel_id)
-
-        if len(results) <= 3:
-            # 如果有效频道太少，使用假数据补充
-            fleet = ChannelDao.get_channel_fleet(channel_id)
-            results += self._channel_data_provider.get_fake_users(fleet.min_score, fleet.max_score, 5)
 
         message = ''
         for index, channel in enumerate(results):

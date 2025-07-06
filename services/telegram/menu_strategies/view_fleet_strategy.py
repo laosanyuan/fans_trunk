@@ -35,10 +35,6 @@ class ViewFleetStrategy(BaseButtonStrategy):
             fleet_id = int(strs[1])
             fleet = FleetDao.get_fleet_by_id(fleet_id)
             channels = ChannelDao.get_fleet_chanels(fleet_id, 15)
-            if len(channels) < 30:
-                # 数据真假各一半
-                fakes = self._channel_data_provider.get_fake_users(fleet.min_score, fleet.max_score, 30-len(channels))
-                channels.extend(fakes)
             random.shuffle(channels)
             return self._get_channel_list(fleet, channels), markup
         return '未知错误', markup

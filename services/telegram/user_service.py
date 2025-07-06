@@ -31,6 +31,8 @@ class UserService:
         channels = ChannelDao.get_all_validate_channels()
         for channel in channels:
             score, member_count = await self._score_service.get_score_and_member(channel.id)
+            if score == 0 and member_count == 0:
+                continue
 
             fleet = FleetDao.get_fleet_by_score(score)
             ChannelDao.update_member_count(channel.id, member_count, fleet.id)
@@ -144,6 +146,14 @@ class UserService:
                     message = f'🚫 频道【{channel_title}】机器人权限发生变更，机器人时失去频道发车权限，请重新赋予正确权限后恢复发车！'
             else:
                 score, member_count = await self._score_service.get_score_and_member(channel_id)
+                if score == 0 and member_count == 0:
+                    message = f'🚫 频道【{channel_title}】由于数据异常，无法进行发车，请重新添加！'
+                    await context.bot.send_message(
+                        chat_id=uid,
+                        text=message,
+                        parse_mode=ParseMode.HTML
+                    )
+                    return
                 fleet = FleetDao.get_fleet_by_score(score)
                 fake_channels, fake_members = self._channel_data_provider.get_fleet_summary(fleet.id)
 
