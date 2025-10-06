@@ -20,6 +20,8 @@ class ChatService:
         self._channel_data_provider = inject.instance(ChannelDataProvider)
         self._application = application
         self._application.add_handler(MessageHandler(TEXT & (~COMMAND), self._handle_new_message))
+        # 删除延时缓存
+        self._delete_channel_cache:dict[int, datetime] = {}
 
     async def check_chat(self):
         channels = ChannelDao.get_all_validate_channels()
@@ -44,7 +46,10 @@ class ChatService:
     async def _delete_message(self, channel_id: int, message_id: int) -> None:
         try:
             await self._application.bot.delete_message(channel_id, message_id)
+            self._reset_channel_cache(channel_id)
         except BadRequest as e:
+            if not self._can_delete_channel(channel_id):
+                return
             tmp = ChannelDao.get_channel(channel_id)
             print(f'频道已不存在:{tmp.title}，移出列表')
             ChannelDao.remove_channel(channel_id)
@@ -84,7 +89,10 @@ class ChatService:
                 disable_web_page_preview=True,
                 reply_markup=markup)
             ChatDao.update_publish_message(channel_id, result.message_id)
+            self._reset_channel_cache(channel_id)
         except Forbidden as e:
+            if not self._can_delete_channel(channel_id):
+                return
             tmp = ChannelDao.get_channel(channel_id)
             await self._application.bot.send_message(
                 chat_id=tmp.user_id,
@@ -92,10 +100,14 @@ class ChatService:
                 parse_mode=ParseMode.HTML)
             ChannelDao.remove_channel(channel_id)
         except BadRequest as e:
+            if not self._can_delete_channel(channel_id):
+                return
             tmp = ChannelDao.get_channel(channel_id)
             print(f'频道已不存在:{tmp.title}，移出列表')
             ChannelDao.remove_channel(channel_id)
         except Exception as e:
+            if not self._can_delete_channel(channel_id):
+                return
             tmp = ChannelDao.get_channel(channel_id)
             await self._application.bot.send_message(
                 chat_id=tmp.user_id,
@@ -125,3 +137,16 @@ class ChatService:
         msg = update.channel_post
         channel_id = msg.chat_id
         ChatDao.set_message_invalidate(channel_id)
+
+    def _reset_channel_cache(self,channel_id: int) -> None:
+        if channel_id in self._delete_channel_cache:
+            self._delete_channel_cache.pop(channel_id)
+
+    def _can_delete_channel(self, channel_id: int) -> bool:
+        if channel_id not in self._delete_channel_cache:
+            return False
+        if  datetime.now() - self._delete_channel_cache[channel_id] >= timedelta(hours=36):
+            print(f'删除延时缓存连续存在超出36小时:{channel_id}')
+            self._clear_delete_channel_cache(channel_id)
+            return True
+        return False
