@@ -11,7 +11,6 @@ from db.daos.channel_dao import ChannelDao
 
 class AdminService:
     def __init__(self, application: Application):
-        self._admin_user = inject.instance(ConfigParser).get_admin_user()
         self._application = application
         self._menu_strategy_manager = MenuStrategyManager(self._application.bot)
 
@@ -21,16 +20,15 @@ class AdminService:
         user_name = update.effective_user.username
         message = '未知命令！'
 
-        if user_name == self._admin_user:
-            users = UserDao.get_user_count()
-            count, memebers = FleetDao.get_channel_summary()
-            tmp_channels = ChannelDao.get_channels()
+        users = UserDao.get_user_count()
+        count, memebers = FleetDao.get_channel_summary()
+        tmp_channels = ChannelDao.get_channels()
 
-            message = f'用户数量：{users}\n频道数量：{count}\n成员数量：{memebers}\n\n'
-            message += '以下是成员数量前50的频道数据：\n'
+        message = f'用户数量：{users}\n频道数量：{count}\n成员数量：{memebers}\n\n'
+        message += '以下是成员数量前50的频道数据：\n'
 
-            for index, item in enumerate(tmp_channels):
-                message += f'{index+1}. <b><a href="https://t.me/{item.name}">{item.title}</a></b> - {item.member_count}\n'
+        for index, item in enumerate(tmp_channels):
+            message += f'{index+1}. <b><a href="https://t.me/{item.name}">{item.title}</a></b> - {item.member_count}\n'
 
         await update.message.reply_text(
             message,
