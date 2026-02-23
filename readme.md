@@ -169,4 +169,23 @@ Telegram机器人创建方式与常规方法一致（BotFather注册），获取
     }
 ]
 ```
+### 部署镜像
+将前面更新后的三个配置文件上传到服务器，最好放在相同文件夹中，使用以下命令启动服务。
+
+加载镜像：
+```shell
+docker load -i fans_trunk_1.0.11.tar
+```
+
+运行服务：
+```shell
+docker run -d \
+  --name trump_trunk \
+  -v /root/trump/settings.json:/app/configs/settings.json \
+  -v /root/trump/data.db:/app/configs/data.db \
+  -v /root/trump/ad_settings.json:/app/configs/ad_settings.json \
+  -v /root/trump/fleets.json:/app/configs/fleets.json \
+  fans_trunk:1.0.11
+```
+> 名称路径等根据自己实际情况修改
 
