@@ -163,7 +163,7 @@ class UserService:
                 if has_permission:
                     message = f'''🎉 恭喜您，添加频道成功！
 
-系统根据您的频道数据智能评级，【<b>{channel_title}</b>】当前的得分为<b>{score}</b>，分配于<b>{fleet.name}</b>，本车队包含频道数量：<b>{fake_channels}</b>，合计覆盖成员数量：<b>{fake_members}</b>！
+系统根据您的频道数据智能评级，【<b>{channel_title}</b>】当前的得分为<b>{score}</b>，分配于<b>{fleet.name}</b>，本车队包含频道数量：<b>{fake_channels + 1}</b>，合计覆盖成员数量：<b>{fake_members}</b>！
 
 注意，当前的评分和分配车队都是基于此频道目前的数据计算得出，随着数据的变化，评分和分配车队随时也会随时发生变化。
 
