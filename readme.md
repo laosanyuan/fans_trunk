@@ -1,6 +1,8 @@
 `fans_trunk`是针对于Telegram频道运营者开发的涨粉机器人工具（互推车）。目前核心功能为频道互推，通过公平、高效的互推机制，帮助频道主交换粉丝资源，实现共同增长。
 使用者（频道主）获得更多曝光实现粉丝增长，互推车部署者则可通过插入广告实现收益，达到双赢。
 
+![Home Page](/images/demo1.png)
+
 # 核心功能
 
 当前只支持频道互推
@@ -72,6 +74,7 @@
 # 部署说明
 
 ## 创建Telegram机器人
+
 Telegram机器人创建方式与常规方法一致（BotFather注册），获取到机器人token后备用。
 [Telegram机器人创建参考](https://blog.csdn.net/qq_24208545/article/details/154842123)
 
@@ -104,6 +107,7 @@ Telegram机器人创建方式与常规方法一致（BotFather注册），获取
 车队配置（`fleets.json`）用来分配各车队的分数分配可以自行设置，也可使用项目默认配置。
 
 通常来说，系统评分的范围 在0-100之间，可根据自己的需求自行分配分数范围和名称。
+![Fleets](/images/demo3.png)
 
 ```json
 [
@@ -154,30 +158,34 @@ Telegram机器人创建方式与常规方法一致（BotFather注册），获取
 [
     {
         "text": "更多精彩内容",
-        "link": "https://t.me/zhongwen_sousou",
+        "link": "https://t.me/zhong_so",
         "position": "head"
     },
     {
         "text": "加入我们的频道",
-        "link": "https://t.me/zhongwen_sousou",
+        "link": "https://t.me/zhong_so",
         "position": "tail"
     },
     {
         "text": "加入我们的频道",
-        "link": "https://t.me/zhongwen_sousou",
+        "link": "https://t.me/zhong_so",
         "position": "button"
     }
 ]
 ```
+
 ### 部署镜像
+
 将前面更新后的三个配置文件上传到服务器，最好放在相同文件夹中，使用以下命令启动服务。
 
 加载镜像：
+
 ```shell
 docker load -i fans_trunk_1.0.11.tar
 ```
 
 运行服务：
+
 ```shell
 docker run -d \
   --name trump_trunk \
@@ -187,5 +195,9 @@ docker run -d \
   -v /root/trump/fleets.json:/app/configs/fleets.json \
   fans_trunk:1.0.11
 ```
+
 > 名称路径等根据自己实际情况修改
 
+完成以上操作后，通过机器人命令即可添加频道验证使用：
+![Demo](/images/demo2.png)
+![Demo](/images/demo4.png)
