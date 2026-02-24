@@ -10,6 +10,10 @@ class UserDao:
     def add_user(uid: int, user_name: str, full_name: str) -> None:
         is_exists = User.select().where(User.id == uid).exists()
         if not is_exists:
+            if user_name == None:
+                user_name = ''
+            if full_name == None:
+                full_name = ''
             User.create(id=uid, user_name=user_name, full_name=full_name, add_time=datetime.now())
 
     # 封禁用户
