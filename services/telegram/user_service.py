@@ -176,7 +176,7 @@ class UserService:
                 text=message,
                 parse_mode=ParseMode.HTML
             )
-        elif status == ChatMemberStatus.LEFT or status == ChatMemberStatus.BANNED or ChatMemberStatus.RESTRICTED:
+        elif status in (ChatMemberStatus.LEFT, ChatMemberStatus.BANNED, ChatMemberStatus.RESTRICTED):
             if not ChannelDao.is_exists(channel_id):
                 # 频道数据不存在可能为主动删除
                 return

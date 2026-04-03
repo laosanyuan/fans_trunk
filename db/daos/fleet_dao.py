@@ -17,7 +17,10 @@ class FleetDao:
     @staticmethod
     def get_fleet_by_score(score: int) -> FleetDTO:
         # 根据评分获取车队
-        result = Fleet.get(score >= Fleet.min_score and score < Fleet.max_score)
+        result = Fleet.get(
+            (Fleet.min_score <= score) &
+            (Fleet.max_score > score)
+        )
         return FleetDTO.from_model(result)
 
     @staticmethod

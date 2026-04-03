@@ -1,6 +1,3 @@
-import asyncio
-import threading
-
 from telegram.ext import ApplicationBuilder
 import inject
 
@@ -21,7 +18,7 @@ class BotManager:
         self.admin_service = AdminService(self._application)
         self.chat_service = ChatService(self._application)
 
-    async def run(self):
+    def run(self):
         self._application.run_polling(close_loop=False)
 
     def get_bot_name(self) -> str:

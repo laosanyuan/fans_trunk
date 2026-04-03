@@ -51,10 +51,7 @@ async def main():
         bot_manager = inject.instance(BotManager)
 
         scheduler_manager.start()
-        await bot_manager.run()
-
-        while True:
-            await asyncio.sleep(1)
+        bot_manager.run()
 
     except KeyboardInterrupt:
         print("程序被手动终止")
