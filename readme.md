@@ -181,7 +181,7 @@ Telegram机器人创建方式与常规方法一致（BotFather注册），获取
 加载镜像：
 
 ```shell
-docker load -i fans_trunk_1.0.11.tar
+docker load -i fans_trunk_1.0.13.tar
 ```
 
 运行服务：
@@ -193,7 +193,7 @@ docker run -d \
   -v /root/trump/data.db:/app/configs/data.db \
   -v /root/trump/ad_settings.json:/app/configs/ad_settings.json \
   -v /root/trump/fleets.json:/app/configs/fleets.json \
-  fans_trunk:1.0.11
+  fans_trunk:1.0.13
 ```
 
 > 名称路径等根据自己实际情况修改
